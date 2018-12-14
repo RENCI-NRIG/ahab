@@ -219,6 +219,7 @@
 		<module>assemble</module>
 		<module>libndl</module>
 		<module>libtransport</module>
+		<module>ahab-maven-archetypes</module>
 	</modules>
 
 	<build>
