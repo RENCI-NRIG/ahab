@@ -32,11 +32,6 @@ import org.renci.ahab.libndl.Slice;
 import orca.ndl.NdlCommons;
 
 public class Node extends ManifestResource {
-
-	//protected static final String NOT_SPECIFIED = "Not specified";
-	//public static final String NODE_NETMASK="32";
-	
-	
 	protected class NetworkInterface{
 		private String ipAddress; 
 		private String netmask;
@@ -90,26 +85,14 @@ public class Node extends ManifestResource {
 		}
 		
 	}
-	
 
-	
 	//Node
 	protected Map<LinkConnection, NetworkInterface> interfaces = null;
 	
 	protected org.renci.ahab.libndl.resources.request.ComputeNode computeNode;
-	
-//	interface INodeCreator {
-//		public Node create();
-//		public void reset();
-//}
-
 
 	public String toStringLong() {
 		String ret =  name;
-//		if (domain != null) 
-//			ret += " in domain " + domain;
-//		if (image != null)
-//			ret += " with image " + image;
 		return ret;
 	}
 	
@@ -117,7 +100,6 @@ public class Node extends ManifestResource {
 		return name;
 	}
 		
-//basic constructor
 	public Node(Slice slice, String name) {
 		super(slice);
 		this.name = name; //name should be unique... i think
@@ -166,10 +148,6 @@ public class Node extends ManifestResource {
 	public void setIp(LinkConnection e, String addr, String netmask) {
 		if (e == null)
 			return;
-		//if(interfaces.get(fol) == null)
-		//	interfaces.put(fol, new NetworkInterface());
-		
-		
 		if ((addr == null) || (netmask == null)) {
 			interfaces.get(e).setIpAddress(addr);
 			interfaces.get(e).setNetmask(netmask);
@@ -216,7 +194,6 @@ public class Node extends ManifestResource {
 	}
 	
 	public String getPublicIP(){
-		//NdlCommons.getNodeServices(nr)
 		for (String service: NdlCommons.getNodeServices(this.getModelResource())) {
 			if (service.startsWith("ssh://root@")) {
 				service = service.replaceAll("ssh://root@","");
@@ -226,8 +203,7 @@ public class Node extends ManifestResource {
 		}
 		return null;
 	}
-	
-	
+
 	/**
 	 * returns empty set if no dependencies
 	 * @return
@@ -261,28 +237,4 @@ public class Node extends ManifestResource {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-//	public void setManagementAccess(List<String> s) {
-//		managementAccess = s;
-//	}
-//	
-//	// all available access options
-//	public List<String> getManagementAccess() {
-//		return managementAccess;
-//	}
-//	
-//	// if ssh is available
-//	public String getSSHManagementAccess() {
-//		for (String service: managementAccess) {
-//			if (service.startsWith("ssh://root")) {
-//				return service;
-//			}
-//		}
-//		return null;
-//	}
-	
-
-
-	
- 
 }

@@ -3,9 +3,6 @@
  */
 package org.renci.ahab.libndl.resources.manifest;
 
-
-
-
 /**
  * @author geni-orca
  *

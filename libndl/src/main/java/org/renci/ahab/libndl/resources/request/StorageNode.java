@@ -1,6 +1,5 @@
 package org.renci.ahab.libndl.resources.request;
 
-import org.renci.ahab.libndl.Slice;
 import org.renci.ahab.libndl.SliceGraph;
 
 /**
@@ -24,29 +23,16 @@ public class StorageNode extends Node {
 		assert(cap >= 0);
 		capacity = cap;
 	}
+
+	public void setMntPoint(String mntPoint) {
+	    if(mntPoint != null && !mntPoint.isEmpty()) {
+	        hasMntPoint = mntPoint;
+        }
+    }
 	
 	public long getCapacity() {
 		return capacity;
 	}
-	
-	/** 
-	 * Create a detailed printout of properties
-	 * @return
-	 */
-//	@Override
-//	public String getViewerText() {
-//		String viewText = "";
-//		viewText += "Storage node: " + name;
-//		viewText += "\nStorage reservation state: " + (state != null ? state : NOT_SPECIFIED);
-//		viewText += "\nReservation notice: " + (resNotice != null ? resNotice : NOT_SPECIFIED);
-//		viewText += "Capacity: " + capacity;
-//		
-//		viewText += "\n\nInterfaces: ";
-//		for(Map.Entry<OrcaLink, Pair<String>> e: addresses.entrySet()) {
-//			viewText += "\n\t" + e.getKey().getName() + ": " + e.getValue().getFirst() + "/" + e.getValue().getSecond();
-//		}
-//		return viewText;
-//	}
 	
 	public void setSharedNetwork() {
 		sharedNetworkStorage = true;
@@ -92,8 +78,6 @@ public class StorageNode extends Node {
 		if (r instanceof Network){
 			stitch = new InterfaceNode2Net(this,(Network)r,sliceGraph);		
 		} else {
-			//Can't stitch storage to r
-			//Should throw exception
 			System.out.println("Error: Cannot stitch OrcaStorageNode to " + r.getClass().getName());
 			return null;
 		}

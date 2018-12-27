@@ -27,31 +27,22 @@ import java.util.Collection;
 import java.util.List;
 
 import org.renci.ahab.libndl.LIBNDL;
-import org.renci.ahab.libndl.Slice;
 import org.renci.ahab.libndl.SliceGraph;
-import org.renci.ahab.libndl.ndl.NDLModel;
 
 public class ComputeNode extends Node {	
 	protected int nodeCount = 1; //The actual count of the nodes for a group
 	protected int maxNodeCount = 1; //The max nodes a group can expand to. Used for autoip. Default = nodeCount
 	protected boolean splittable = false;
 
-	//protected Image image = null;
 	protected String group = null;
-	//protected String nodeType = null;
-	//protected String postBootScript = null;
-		
 	//list of nodes that instantiate this group
-	ArrayList<org.renci.ahab.libndl.resources.manifest.Node> manifestNodes; 
-		
+	ArrayList<org.renci.ahab.libndl.resources.manifest.Node> manifestNodes;
 	protected List<String> managementAccess = null;
-
 	// list of open ports
 	protected String openPorts = null;
 
 	public ComputeNode(SliceGraph sliceGraph, String name){
 		super(sliceGraph,name);
-		
 		nodeCount = 1;
 		manifestNodes = new ArrayList<org.renci.ahab.libndl.resources.manifest.Node>();
 	}
@@ -95,7 +86,6 @@ public class ComputeNode extends Node {
 	
 	public String getPostBootScript(){
 		return this.getNDLModel().getPostBootScript(this); 
-		//return postBootScript;
 	}
 	
 
@@ -104,18 +94,9 @@ public class ComputeNode extends Node {
 	}
 	
 	public void setMaxNodeCount(int count){
-		//if (sliceGraph.isNewRequest()){
-		//	maxNodeCount = count;
-		//	
-		//	if(nodeCount > maxNodeCount){
-		//		setNodeCount(maxNodeCount);
-		//	}
-		//}
 		maxNodeCount = count;
-		
 	}
-	
-	
+
 	public void initializeNodeCount(int nc) {
 		nodeCount = nc;
 		if(nodeCount > maxNodeCount){
@@ -127,8 +108,6 @@ public class ComputeNode extends Node {
 	}
 	
 	public void setNodeCount(int nc) {
-		//LIBNDL.logger().debug("setNodeCount: nc = " + nc + ", nodeCount = " + nodeCount + ", isNewReqeust = " + sliceGraph.isNewRequest());
-		
 		if (nc <= 0){
 			LIBNDL.logger().warn("setNodeCount: Node group size must be greater than 0");
 			return;
@@ -143,22 +122,8 @@ public class ComputeNode extends Node {
 			LIBNDL.logger().warn("setNodeCount: Setting node group size to the current nodoe group size");
 			return;
 		}
-		
-		//if it is a modify
-//		if (!sliceGraph.isNewRequest()){
-//			if(nc > nodeCount){
-//				LIBNDL.logger().debug("setNodeCount: " + nc);
-//				sliceGraph.increaseComputeNodeCount(this, nc-nodeCount);
-//			}
-//		} else {
-//			//if it is a new request
-//			if(nodeCount > maxNodeCount){
-//				maxNodeCount = nodeCount;
-//			}
-//		}
 		LIBNDL.logger().debug("setNodeCount: Setting node group size to " + nc);
 		nodeCount = nc;
-				
 	}	
 	
 	public void deleteNode(String uri){
@@ -204,23 +169,42 @@ public class ComputeNode extends Node {
 	
 		
 	public Interface stitch(RequestResource r){
-		LIBNDL.logger().debug("ComputeNode.stitch"); 
+		LIBNDL.logger().debug("ComputeNode.stitch");
 		Interface stitch = null;
 		if (r instanceof Network){
 			LIBNDL.logger().debug("ComputeNode.stitch:  calling InterfaceNode2Net");
 			stitch = new InterfaceNode2Net(this,(Network)r,sliceGraph);
-			
+
 		} else {
 			//Can't stitch computenode to r
 			//Should throw exception
 			LIBNDL.logger().error("Error: Cannot stitch OrcaComputeNode to " + r.getClass().getName());
+			System.out.println("Error: Cannot stitch OrcaComputeNode to " + r.getClass().getName());
 			return null;
 		}
 		sliceGraph.addStitch(this,r,stitch);
-		
+
 		return stitch;
 	}
-	
+
+    public Interface stitch(RequestResource r, RequestResource depend){
+        LIBNDL.logger().debug("ComputeNode.stitch");
+        Interface stitch = null;
+        if (r instanceof Network){
+            LIBNDL.logger().debug("ComputeNode.stitch:  calling InterfaceNode2Net");
+            stitch = new InterfaceNode2Net(this,(Network)r,sliceGraph);
+
+        } else {
+            //Can't stitch computenode to r
+            //Should throw exception
+            LIBNDL.logger().error("Error: Cannot stitch OrcaComputeNode to " + r.getClass().getName());
+            System.out.println("Error: Cannot stitch OrcaComputeNode to " + r.getClass().getName());
+            return null;
+        }
+        sliceGraph.addStitch(this,r,stitch, depend);
+
+        return stitch;
+    }
 	
 	@Override
 	public String getPrintText() {
@@ -232,9 +216,4 @@ public class ComputeNode extends Node {
 	public void delete() {
 		sliceGraph.deleteResource(this);
 	}
-
-	
-
-	
-	
 }

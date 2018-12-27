@@ -27,122 +27,92 @@ public class CrossConnect extends ManifestResource{
 	* OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
 	* IN THE WORK.
 	*/
-	
-	
-	    protected long bandwidth;
-	    protected long latency;
-	    protected String label = null;
-	    protected String realName = null;
-	    
-		
-	    public CrossConnect(Slice slice, String name) {
-	    	super(slice);
-	        this.name = name;
-	    }
 
-	    interface ILinkCreator {
-	    	public LinkConnection create(String prefix);
-	    	public LinkConnection create(String nm, long bw);
-	    	public void reset();
-	    }
-	    
-	    public void setBandwidth(long bw) {
-	    	bandwidth = bw;
-	    }
+	protected long bandwidth;
+	protected long latency;
+	protected String label = null;
+	protected String realName = null;
 
-	    public void setLatency(long l) {
-	    	latency = l;
-	    }
 
-	    public void setLabel(String l) {
-	    	if ((l != null) && l.length() > 0)
-	    		label = l;
-	    	else
-	    		label = null;
-	    }
+	public CrossConnect(Slice slice, String name) {
+		super(slice);
+		this.name = name;
+	}
 
-	    public String getLabel() {
-	    	return label;
-	    }
-	    
-	    public long getBandwidth() {
-	    	return bandwidth;
-	    }
-	    
-	    public long getLatency() {
-	    	return latency;
-	    }
-	    
-	    
-	    public void setRealName(String n) {
-	    	this.realName = n;
-	    }
-		
-	    @Override
-	    public String toString() {
-	        return name;
-	    }
-	    
-	  
-	    
-	    public static class OrcaLinkFactory implements Factory<LinkConnection> {
-	       private ILinkCreator inc = null;
-	        
-	        public OrcaLinkFactory(ILinkCreator i) {
-	        	inc = i;
-	        }
-	        
-	        public LinkConnection create() {
-	        	if (inc == null)
-	        		return null;
-	        	synchronized(inc) {
-	        		return inc.create(null);
-	        	}
-	        }    
-	    }
-	    
-	    // link to broadcast?
-	    public boolean linkToBroadcast() {
-//	    	// if it is a link to broadcastlink, no editable properties
-//	    	Pair<OrcaNode> pn = Request.getInstance().getGraph().getEndpoints(this);
-//	    	
-//	    	if (pn == null)
-//	    		return false;
-//	    	
-//	    	//if ((pn.getFirst() instanceof OrcaVLAN) || 
-//	    	//		(pn.getSecond() instanceof OrcaVLAN))
-//	    	//	return true;
-	    	return false;
-	    }
-	    
-	    // link to shared storage?
-	    public boolean linkToSharedStorage() {
-	    	// if it is a link to broadcastlink, no editable properties
-//	    	Pair<OrcaNode> pn = Request.getInstance().getGraph().getEndpoints(this);
-//	    	
-//	    	if (pn == null)
-//	    		return false;
-//	    	
-//	    	if (pn.getFirst() instanceof OrcaStorageNode) {
-//	    		OrcaStorageNode snode = (OrcaStorageNode)pn.getFirst();
-//	    		if (snode.getSharedNetwork())
-//	    			return true;
-//	    	}
-//	    	
-//	    	if (pn.getSecond() instanceof OrcaStorageNode) {
-//	    		OrcaStorageNode snode = (OrcaStorageNode)pn.getSecond();
-//	    		if (snode.getSharedNetwork())
-//	    			return true;
-//	    	}
-	    	return false;
-	    }
+	interface ILinkCreator {
+		public LinkConnection create(String prefix);
+		public LinkConnection create(String nm, long bw);
+		public void reset();
+	}
 
-		@Override
-		public String getPrintText() {
-			// TODO Auto-generated method stub
-			return null;
+	public void setBandwidth(long bw) {
+		bandwidth = bw;
+	}
+
+	public void setLatency(long l) {
+		latency = l;
+	}
+
+	public void setLabel(String l) {
+		if ((l != null) && l.length() > 0)
+			label = l;
+		else
+			label = null;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public long getBandwidth() {
+		return bandwidth;
+	}
+
+	public long getLatency() {
+		return latency;
+	}
+
+
+	public void setRealName(String n) {
+		this.realName = n;
+	}
+
+	@Override
+	public String toString() {
+		return name;
+	}
+
+
+
+	public static class OrcaLinkFactory implements Factory<LinkConnection> {
+	   private ILinkCreator inc = null;
+
+		public OrcaLinkFactory(ILinkCreator i) {
+			inc = i;
 		}
-	    
 
+		public LinkConnection create() {
+			if (inc == null)
+				return null;
+			synchronized(inc) {
+				return inc.create(null);
+			}
+		}
+	}
 
+	// link to broadcast?
+	public boolean linkToBroadcast() {
+		return false;
+	}
+
+	// link to shared storage?
+	public boolean linkToSharedStorage() {
+		return false;
+	}
+
+	@Override
+	public String getPrintText() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

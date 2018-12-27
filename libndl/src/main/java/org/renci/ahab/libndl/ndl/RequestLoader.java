@@ -22,26 +22,18 @@
 */
 package org.renci.ahab.libndl.ndl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import orca.ndl.INdlRequestModelListener;
 import orca.ndl.NdlCommons;
 import orca.ndl.NdlGenerator;
 import orca.ndl.NdlRequestParser;
-
 import org.apache.commons.lang.StringUtils;
 import org.renci.ahab.libndl.LIBNDL;
-import org.renci.ahab.libndl.Slice;
 import org.renci.ahab.libndl.SliceGraph;
 import org.renci.ahab.libndl.resources.common.ModelResource;
 import org.renci.ahab.libndl.resources.request.ComputeNode;
-import org.renci.ahab.libndl.resources.request.Interface;
 import org.renci.ahab.libndl.resources.request.InterfaceNode2Net;
 import org.renci.ahab.libndl.resources.request.Network;
 import org.renci.ahab.libndl.resources.request.Node;
@@ -49,12 +41,10 @@ import org.renci.ahab.libndl.resources.request.RequestReservationTerm;
 import org.renci.ahab.libndl.resources.request.RequestResource;
 import org.renci.ahab.libndl.resources.request.StitchPort;
 import org.renci.ahab.libndl.resources.request.StorageNode;
-
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-import edu.uci.ics.jung.graph.SparseMultigraph;
 
 public class RequestLoader extends NDLLoader  implements INdlRequestModelListener {
 	
@@ -67,8 +57,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 		this.sliceGraph = sliceGraph;
 		this.ndlModel = ndlModel;
 	}
-    
-
 
 	/**
 	 * Load from string
@@ -111,13 +99,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 		String guid = StringUtils.removeEnd(StringUtils.removeStart(u, NdlCommons.ORCA_NS), "#");
 		
 		this.sliceGraph.setNsGuid(guid);
-		
-		//this.slice.setState(NdlCommons.getGeniSliceStateName(i));
-		
-		/*if (i != null) {
-			reservationDomain = RequestSaver.reverseLookupDomain(NdlCommons.getDomain(i));
-			this.sliceGraph.setOFVersion(NdlCommons.getOpenFlowVersion(i));
-		}*/
 	}
 
 	public void ndlReservationEnd(Literal e, OntModel m, Date end) {
@@ -152,36 +133,19 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 			Resource returnedResource = ndlModel.getModelResource(newComputeNode);
 			LIBNDL.logger().debug("returnedResource.getLocalName(): " + returnedResource.getLocalName());
 			ndlModel.printRequest2NDLMap();
-			
-			//LIBNDL.logger().debug("ndlModel: " + ndlModel);
-			//ndlModel.mapSliceResource2ModelResource(newComputeNode, ce);
-			//newNode.setNDLModel(ndlModel);
-			//} else {
-			//	LIBNDL.logger().debug("Node: " + ce.getLocalName() + " : found computeElementClass without parent, skipping!");
-			//	return;
-			//}
 		} else if (ceClass.equals(NdlCommons.serverCloudClass)) {
 			LIBNDL.logger().debug("BUILDING: Group Node: " + ce.getLocalName() + " : found serverCloudClass, parent = " + ce.hasProperty(NdlCommons.manifestHasParent));
 			ComputeNode newNodeGroup = this.sliceGraph.buildComputeNode(ce.getLocalName());
 			ndlModel.mapRequestResource2ModelResource(newNodeGroup, ce);
-			//newNodeGroup.setNDLModel(ndlModel);
-			//ndlModel.mapSliceResource2ModelResource(newNodeGroup, ce);
 			newComputeNode = newNodeGroup;
-			//int ceCount = NdlCommons.getNumCE(ce);
-			//if (ceCount > 0) newNodeGroup.setNodeCount(ceCount);
 			newNodeGroup.initializeNodeCount(0);
-			//newNodeGroup.setSplittable(NdlCommons.isSplittable(ce));
 			newNode = newNodeGroup;
-
 
 			String groupUrl = NdlCommons.getRequestGroupURLProperty(ce);
 			LIBNDL.logger().debug("NdlCommons.getRequestGroupURLProperty: " + groupUrl);
 
 			String nodeUrl = ce.getURI();
 			LIBNDL.logger().debug("URI: " + nodeUrl);
-
-
-
 		}  else if (NdlCommons.isNetworkStorage(ce)) {
 			LIBNDL.logger().debug("BUILDING: Storage Node: " + ce.getLocalName() );
 			// storage node
@@ -204,7 +168,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 			LIBNDL.logger().debug("load domain: " + RequestGenerator.reverseLookupDomain(domain));
 			newNode.setDomain(RequestGenerator.reverseLookupDomain(domain));
 		}
-			
 		
 		if (ceClass.equals(NdlCommons.computeElementClass) || ceClass.equals(NdlCommons.serverCloudClass)){
 			Resource ceType = NdlCommons.getSpecificCE(ce);
@@ -224,9 +187,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 				try {
 					String imageURL = NdlCommons.getIndividualsImageURL(ce);
 					String imageHash = NdlCommons.getIndividualsImageHash(ce);
-					//String imName = this.sliceGraph.buildImage(new OrcaImage(di.getLocalName(), 
-					//		new URL(imageURL), imageHash), null);
-					//String imName = imageURL + imageHash;  //FIX ME: not right
 					String imName = newComputeNode.getName() + "-image"; //FIX ME: not right:  why do we even have an image name???
 					newComputeNode.setImage(imageURL,imageHash,imName);
 				} catch (Exception e) {
@@ -251,8 +211,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 			long bandwidth, long latency, List<Resource> interfaces) {
 		
 		LIBNDL.logger().debug("NetworkConnection: " + l);
-		
-		// LIBNDL.logger().debug("Found connection " + l + " connecting " + interfaces + " with bandwidth " + bandwidth);
 		if (l == null)
 			return;
 		
@@ -279,7 +237,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 			return;
 		}
 		
-		
 		RequestResource onode = null;
 		if(node != null){
 			ndlModel.printRequest2NDLMap();
@@ -295,7 +252,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 			LIBNDL.logger().warn("ndlInterface with null connection: " + intf);
 		}
 		
-		
 		if(onode == null){
 			LIBNDL.logger().warn("ndlInterface with null missing node:  Interface: " + intf + ", Node: " + node);
 			return;
@@ -304,7 +260,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 		//ComputeNode
 		if(onode instanceof ComputeNode && olink instanceof Network){
 			LIBNDL.logger().debug("stitching compute node");
-			//InterfaceNode2Net stitch = (InterfaceNode2Net)onode.stitch(olink);
 			InterfaceNode2Net stitch = sliceGraph.buildInterfaceNode2Net((Node)onode, (Network)olink);
 			ndlModel.mapRequestResource2ModelResource((ModelResource)stitch, intf);
 			stitch.setIpAddress(ip);  
@@ -315,9 +270,7 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 		//StorageNode
 		if(onode instanceof StorageNode){
 			LIBNDL.logger().debug("stitching storage node");
-			//InterfaceNode2Net stitch = (InterfaceNode2Net)onode.stitch(olink);
 			InterfaceNode2Net stitch = sliceGraph.buildInterfaceNode2Net((Node)onode, (Network)olink);
-			
 			return;
 		}
 		
@@ -330,7 +283,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 			sp.setPort(intf.toString());
 			sp.setLabel(NdlCommons.getLayerLabelLiteral(intf));
 			
-			//InterfaceNode2Net stitch = (InterfaceNode2Net)onode.stitch(olink);
 			InterfaceNode2Net stitch = sliceGraph.buildInterfaceNode2Net((Node)onode, (Network)olink);
 			return;
 		}	
@@ -375,15 +327,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 
 	public void ndlNodeDependencies(Resource ni, OntModel m, Set<Resource> dependencies) {
 		LIBNDL.logger().debug("nlNodeDependencies -- SKIPPED");
-		
-		/*OrcaNode mainNode = nodes.get(ni.getURI());
-		if ((mainNode == null) || (dependencies == null))
-			return;
-		for(Resource r: dependencies) {
-			OrcaNode depNode = nodes.get(r.getURI());
-			if (depNode != null)
-				mainNode.buildDependency(depNode);
-		}*/
 	}
 
 	/**
@@ -397,15 +340,6 @@ public class RequestLoader extends NDLLoader  implements INdlRequestModelListene
 		Network ol = this.sliceGraph.buildLink(bl.getLocalName());
 		ndlModel.mapRequestResource2ModelResource(ol, bl);
 		ol.setBandwidth(bandwidth);
-		//ol.setLatency(latency);
-		ol.setLabel(NdlCommons.getLayerLabelLiteral(bl));	
+		ol.setLabel(NdlCommons.getLayerLabelLiteral(bl));
 	}
-
-
-
-
-
-
-
-	
 }

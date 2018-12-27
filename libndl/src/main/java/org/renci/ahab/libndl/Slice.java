@@ -6,18 +6,10 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Date;
-
 import org.apache.log4j.Logger;
 import org.renci.ahab.libndl.ndl.RequestGenerator;
 import org.renci.ahab.libndl.resources.common.ModelResource;
-import org.renci.ahab.libndl.resources.request.BroadcastNetwork;
-import org.renci.ahab.libndl.resources.request.ComputeNode;
-import org.renci.ahab.libndl.resources.request.Interface;
-import org.renci.ahab.libndl.resources.request.Network;
-import org.renci.ahab.libndl.resources.request.Node;
-import org.renci.ahab.libndl.resources.request.RequestResource;
-import org.renci.ahab.libndl.resources.request.StitchPort;
-import org.renci.ahab.libndl.resources.request.StorageNode;
+import org.renci.ahab.libndl.resources.request.*;
 import org.renci.ahab.libndl.util.IP4Subnet;
 import org.renci.ahab.libtransport.AccessToken;
 import org.renci.ahab.libtransport.ISliceTransportAPIv1;
@@ -25,10 +17,7 @@ import org.renci.ahab.libtransport.SliceAccessContext;
 import org.renci.ahab.libtransport.util.ContextTransportException;
 import org.renci.ahab.libtransport.util.TransportException;
 import org.renci.ahab.libtransport.xmlrpc.XMLRPCTransportException;
-
 import edu.uci.ics.jung.graph.SparseMultigraph;
-
-
 
 public class Slice {
 	
@@ -55,9 +44,6 @@ public class Slice {
 		return Slice.loadRequest(readRDFFile(new File(fileName)));
 	}
 	
-	
-	
-	
 	public static Slice loadRequest(String requestRDFString){
 		Slice s = new Slice();
 		s.sliceGraph.loadRequestRDF(requestRDFString);
@@ -72,9 +58,6 @@ public class Slice {
 		s.setSliceProxy(sliceProxy);
 		return s;
 	}
-	
-	
-	
 
 	public static Slice loadManifestFile(String fileName){
 		return Slice.loadManifest(readRDFFile(new File(fileName)));
@@ -128,35 +111,33 @@ public class Slice {
 		return rawRDF;
 	}
 	
-	/************************ Private configuration methods ***************/
-	
-	
-	/************************ User API Methods ****************************/
-	
 	public ComputeNode addComputeNode(String name){
 		return sliceGraph.addComputeNode(name);
 	}
 
-	public StorageNode addStorageNode(String name){
-		return sliceGraph.addStorageNode(name);
+	public StorageNode addStorageNode(String name, long capacity, String mntPoint){
+		return sliceGraph.addStorageNode(name, capacity, mntPoint);
 	}
 
 	public StitchPort addStitchPort(String name, String label, String port, long bandwidth){
 		return sliceGraph.addStitchPort(name, label, port, bandwidth);	 
 	}
 	SparseMultigraph<RequestResource, Interface> g = new SparseMultigraph<RequestResource, Interface>();
-
-	//public Network addLink(String name){
-	//	return sliceGraph.addLink(name);
-	//}
-
 	
 	public BroadcastNetwork addBroadcastLink(String name, long bandwidth){
 		return sliceGraph.addBroadcastLink(name, bandwidth);
 	}
-	
+
 	public BroadcastNetwork addBroadcastLink(String name){
 		return this.addBroadcastLink(name,10000000l);
+	}
+
+	public LinkNetwork addLinkNetwork(String name, long bandwidth){
+		return sliceGraph.addLinkNetwork(name, bandwidth);
+	}
+
+	public LinkNetwork addLinkNetwork(String name){
+		return this.addLinkNetwork(name,10000000l);
 	}
 	
 	public RequestResource getResourceByName(String nm){
@@ -166,10 +147,6 @@ public class Slice {
 	public RequestResource getResouceByURI(String uri){
 		return sliceGraph.getResourceByURI(uri);
 	}
-	
-	//public void deleteResource(RequestResource r){
-	//	sliceGraph.deleteResource(r);
-	//}
 	
 	public Interface stitch(RequestResource r1, RequestResource r2){
 		LIBNDL.logger().error("slice.stitch is unimplemented");
@@ -215,8 +192,6 @@ public class Slice {
 			    Thread.currentThread().interrupt();
 			}
 		}while (!done && i < count);
-		
-		
 	}
 	
 	public void commit() throws XMLRPCTransportException{
@@ -268,7 +243,6 @@ public class Slice {
 		return stitching_GUID;
 	}
 	
-	/**************************** Get Slice Info ***********************************/
 	public Collection<ModelResource> getAllResources(){
 		return sliceGraph.getResources();
 	}
@@ -313,8 +287,7 @@ public class Slice {
 	public void setSliceProxy(ISliceTransportAPIv1 sliceProxy) {
 		this.sliceProxy = sliceProxy;
 	}
-	/**************************** Load/Save Methods **********************************/
-	
+
 	private void save(String file){
 		sliceGraph.save(file);
 	}
@@ -323,19 +296,16 @@ public class Slice {
 		return sliceGraph.getRDFString();
 	}
 
-	/**************************** Logger Methods *************************************/
 	public Logger logger(){
 		return LIBNDL.logger();
 	}
 	
-	/***************************** Debug Methods **************/
 	public String getDebugString(){
 		return sliceGraph.getDebugString();
 	}
 	public String getSliceGraphString(){
 		return sliceGraph.getSliceGraphString();
 	}
-	/*****************************  Auto generatted methods to be sorted **************/
 	public Collection<Interface> getInterfaces(RequestResource requestResource) {
 		// TODO Auto-generated method stub
 		return null;
