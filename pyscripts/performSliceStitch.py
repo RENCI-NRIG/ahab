@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
 
-import xmlrpclib
-import ConfigParser
+import ssl
+import xmlrpc.client
+import configparser
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -14,7 +15,7 @@ parser.add_option("-o", "--from-reservation", dest="fromReservation",
 parser.add_option("-x", "--to-reservation", dest="toReservation",
                   help="To Reservation GUID")
 parser.add_option("-s", "--server", dest="server",
-                  help="XMLRPC server URL", metavar="URL", default="http://localhost:11443/orca/xmlrpc")
+                  help="XMLRPC server URL", metavar="URL", default="https://geni.renci.org:11443/orca/xmlrpc")
 parser.add_option("-c", "--cert", dest="cert",
                   help="PEM file with cert")
 parser.add_option("-p", "--private-key", dest="privateKey",
@@ -23,26 +24,11 @@ parser.add_option("-e", "--secret", dest="secret",
                   help="Secret password")
 (options, args) = parser.parse_args()
 
-class SafeTransportWithCert(xmlrpclib.SafeTransport):
-     __cert_file = ""
-     __key_file = ""
-     _use_datetime = False
-     def __init__(self, certFile, keyFile):
-         self.__cert_file = certFile
-         self.__key_file = keyFile
-
-     def make_connection(self,host):
-         host_with_cert = (host, {
-                       'key_file'  :  self.__key_file,
-                       'cert_file' :  self.__cert_file
-             } )
-         return  xmlrpclib.SafeTransport.make_connection(self,host_with_cert)
-
 mandatories = ['fromSliceID', 'toSliceID', 'fromReservation', 'toReservation', 'secret' ]
 
 for m in mandatories:
     if not options.__dict__[m]:
-        print "Mandatory option is missing\n"
+        print ("Mandatory option is missing\n")
         parser.print_help()
         exit(-1)
 
@@ -54,16 +40,17 @@ props = { 'ip': '172.16.100.100' }
 
 if server_url.startswith('https://'):
     if options.cert == None or options.privateKey == None:
-        print "For using secure (https) transport, you must specify the path to your certificate and private key"
+        print ("For using secure (https) transport, you must specify the path to your certificate and private key")
         parser.print_help()
         exit(-1)
     # create secure transport with client cert
-    transport = SafeTransportWithCert(options.cert, options.privateKey)
-    server = xmlrpclib.Server(server_url, transport=transport)
+    context = ssl.SSLContext()
+    context.load_cert_chain(options.cert, options.privateKey)
+    server = xmlrpc.client.ServerProxy(server_url, context=context)
 else:
-    server = xmlrpclib.Server(server_url)
+    server = xmlrpc.client.ServerProxy(server_url)
 
 # Call the server and get our result.
-print "Issuing perform slice stitch command for reservation ... \n"
+print ("Issuing perform slice stitch command for reservation ... \n")
 result = server.orca.performSliceStitch(options.fromSliceID, options.fromReservation, options.toSliceID, options.toReservation, options.secret, props, credentials)
-print result
+print (result)
