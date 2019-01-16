@@ -1124,6 +1124,29 @@ public class TestDriver {
         }
     }
 
+    public static void testModifyDeleteStorage(String pem, String sliceName){
+        Slice s = null;
+        try{
+
+            ITransportProxyFactory ifac = new XMLRPCProxyFactory();
+            System.out.println("Opening certificate " + pem + " and key " + pem);
+            TransportContext ctx = new PEMTransportContext("", pem, pem);
+
+            ISliceTransportAPIv1 sliceProxy = ifac.getSliceProxy(ctx, new URL    ("https://geni.renci.org:11443/orca/xmlrpc"));
+
+            s = Slice.loadManifestFile(sliceProxy, sliceName);
+            String storageName = "Storage1";
+            StorageNode storage = (StorageNode) s.getResourceByName(storageName);
+            storage.delete();
+            System.out.println(s.getRequest());
+            s.commit();
+        } catch (Exception e){
+            s.logger().debug("Failed to fetch manifest");
+            e.printStackTrace();
+            return;
+        }
+    }
+
     public static void testSliceStatusWithStorage(String pem, String sliceName){
         Slice s = null;
         try{
@@ -1152,10 +1175,11 @@ public class TestDriver {
 
     //TestDriver.deleteAllSDXNetworks(args[0], "pruth.sdx.1");
     //TestDriver.setupSDXLinearNetwork(args[0],"pruth.sdx.1" );
-    TestDriver.testCreateSliceWithStorage(args[0]);
-    TestDriver.testModifyWithStorage(args[0],"kthare10.slice1");
-    TestDriver.testSliceStatusWithStorage(args[0],"kthare10.slice1");
-    TestDriver.testDelete(args[0],"kthare10.slice1");
+    //TestDriver.testCreateSliceWithStorage(args[0]);
+    //TestDriver.testModifyWithStorage(args[0],"kthare10.slice1");
+    TestDriver.testModifyDeleteStorage(args[0],"kthare10.slice1");
+    //TestDriver.testSliceStatusWithStorage(args[0],"kthare10.slice1");
+    //TestDriver.testDelete(args[0],"kthare10.slice1");
     //TestDriver.testNewSlice1(args[0]);
     System.out.println("ndllib TestDriver: END");
     }

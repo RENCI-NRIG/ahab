@@ -414,12 +414,17 @@ public abstract class NDLModel {
 		String ip = null;
 		try {
 			Resource interfaceResource = this.getModelResource(interfaceNode2Net);
-			LIBNDL.logger().debug("NDLModel::getIP:  interfaceIndivdual = " + interfaceResource);
-			LIBNDL.logger().debug("NDLModel::getIP:  interfaceIndivdual.getName = " + interfaceNode2Net.getName());
-			Resource ipResource = interfaceResource.getProperty(NdlCommons.ip4LocalIPAddressProperty).getResource();
-			LIBNDL.logger().debug("NDLModel::getIP: ipResource = " + ipResource);
-			ip = NdlCommons.getLabelID(ipResource);
-			LIBNDL.logger().debug("NDLModel::getIP: ipStr = " + ip);
+			if(interfaceResource != null) {
+                LIBNDL.logger().debug("NDLModel::getIP:  interfaceIndivdual = " + interfaceResource);
+                LIBNDL.logger().debug("NDLModel::getIP:  interfaceIndivdual.getName = " + interfaceNode2Net.getName());
+                Resource ipResource = null;
+                if(interfaceResource.getProperty(NdlCommons.ip4LocalIPAddressProperty) != null ) {
+                    ipResource = interfaceResource.getProperty(NdlCommons.ip4LocalIPAddressProperty).getResource();
+                    LIBNDL.logger().debug("NDLModel::getIP: ipResource = " + ipResource);
+                    ip = NdlCommons.getLabelID(ipResource);
+                    LIBNDL.logger().debug("NDLModel::getIP: ipStr = " + ip);
+                }
+            }
 		} catch (Exception e) {
             e.printStackTrace();
         }

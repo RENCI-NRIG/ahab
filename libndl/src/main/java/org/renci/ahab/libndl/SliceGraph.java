@@ -263,6 +263,11 @@ public class SliceGraph   {
 		}
 		return null;
 	}
+
+    public void deleteResource(StorageNode node){
+        ndlModel.remove(node);
+        deleteResource((RequestResource)node);
+    }
 	
 	public void deleteResource(ComputeNode node){
 		ndlModel.remove(node);	

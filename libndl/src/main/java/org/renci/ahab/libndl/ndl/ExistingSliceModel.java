@@ -321,7 +321,13 @@ public class ExistingSliceModel extends NDLModel{
 
 	@Override
 	public void remove(StorageNode sn) {
-		// TODO Auto-generated method stu(b
-		
+        Resource ni = this.getModelResource(sn);
+        try {
+            // I don't understand why I can pass 'null' for the GUID
+            ngen.declareModifyElementRemoveNode(reservation, ni.getURI(), null);
+        } catch (NdlException e) {
+            logger().error("ExistingSliceModel::remove(StorageNode sn), Failed to declareModifyElementRemoveNode" );
+            e.printStackTrace();
+        }
 	}
 }
