@@ -80,6 +80,7 @@ public abstract class NDLGenerator {
 		dm.put("CIENA (Ottawa,  CA) XO Rack", "cienavmsite.rdf#cienavmsite");
 		dm.put("RCI-RADICS", "rciradicsvmsite.rdf#rciradicsvmsite");
 		dm.put("BBN-RADICS", "bbnradicsvmsite.rdf#bbnradicsvmsite");
+		dm.put("CIENA2 (Hanover, MD) XO Rack", "ciena2vmsite.rdf#ciena2vmsite");
 		dm.put(StitchPort.STITCHING_DOMAIN_SHORT_NAME, "orca.rdf#Stitching");
 
 		domainMap = Collections.unmodifiableMap(dm);
@@ -134,4 +135,58 @@ public abstract class NDLGenerator {
 		//nodeTypes = Collections.unmodifiableMap(nt);
 		nodeTypes = nt;
 	}
+
+
+
+    public enum ReservationState {
+        ReservationStateUnknown(0, ""),
+        ReservationStateNascent(1, "Nascent"),
+        ReservationStateTicketed(2, "Ticketed"),
+        ReservationStateActive(3, "Active"),
+        ReservationStateActiveTicketed(4, "ActiveTicketed"),
+        ReservationStateClosed(5, "Closed"),
+        ReservationStateCloseWait(6, "CloseWait"),
+        ReservationStateFailed(7, "Failed"),
+        ReservationPendingStateClosing(8,"Closing");
+
+
+        ReservationState(int value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+
+        public int value;
+        public String name;
+    }
+
+    public static final Map<String, Integer> reservationStates;
+    static {
+        Map<String, Integer> rs = new HashMap<String, Integer>();
+        rs.put(ReservationState.ReservationStateUnknown.name, ReservationState.ReservationStateUnknown.value);
+        rs.put(ReservationState.ReservationStateNascent.name, ReservationState.ReservationStateNascent.value);
+        rs.put(ReservationState.ReservationStateTicketed.name, ReservationState.ReservationStateTicketed.value);
+        rs.put(ReservationState.ReservationStateActive.name, ReservationState.ReservationStateActive.value);
+        rs.put(ReservationState.ReservationStateActiveTicketed.name, ReservationState.ReservationStateActiveTicketed.value);
+        rs.put(ReservationState.ReservationStateClosed.name, ReservationState.ReservationStateClosed.value);
+        rs.put(ReservationState.ReservationStateCloseWait.name, ReservationState.ReservationStateCloseWait.value);
+        rs.put(ReservationState.ReservationStateFailed.name, ReservationState.ReservationStateFailed.value);
+        rs.put(ReservationState.ReservationPendingStateClosing.name, ReservationState.ReservationPendingStateClosing.value);
+        reservationStates = rs;
+    }
+
+    public static enum SliceState {
+        NULL("NULL"), CONFIGURING("CONFIGURING"), STABLE_ERROR("STABLE WITH ERRORS"), STABLE_OK("STABLE"), CLOSING_DEAD(
+                "CLOSING_DEAD");
+
+        private String n;
+
+        private SliceState(String s) {
+            n = s;
+        }
+
+        @Override
+        public String toString() {
+            return n;
+        }
+    };
 }

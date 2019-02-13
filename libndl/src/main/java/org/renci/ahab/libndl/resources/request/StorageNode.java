@@ -86,6 +86,17 @@ public class StorageNode extends Node {
 		return stitch;
 	}
 
+	public boolean isAttachedTo(ComputeNode c) {
+	    boolean retVal = false;
+        for(Interface i: getInterfaces()) {
+            InterfaceNode2Net ifc = (InterfaceNode2Net)i;
+            if(c.getInterface((RequestResource)ifc.getLink()) != null) {
+                retVal = true;
+            }
+        }
+        return retVal;
+    }
+
 	@Override
 	public String getPrintText() {
 		// TODO Auto-generated method stub

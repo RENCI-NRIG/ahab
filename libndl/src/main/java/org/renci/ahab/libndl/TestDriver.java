@@ -10,9 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+
 import org.renci.ahab.libndl.resources.request.*;
 import org.renci.ahab.libtransport.ISliceTransportAPIv1;
 import org.renci.ahab.libtransport.ITransportProxyFactory;
@@ -1093,6 +1092,48 @@ public class TestDriver {
         }
 
     }
+    public static void testGetSliceState(String pem, String sliceName){
+        Slice s = null;
+        try{
+
+            ITransportProxyFactory ifac = new XMLRPCProxyFactory();
+            System.out.println("Opening certificate " + pem + " and key " + pem);
+            TransportContext ctx = new PEMTransportContext("", pem, pem);
+
+            ISliceTransportAPIv1 sliceProxy = ifac.getSliceProxy(ctx, new URL    ("https://geni.renci.org:11443/orca/xmlrpc"));
+            //ISliceTransportAPIv1 sliceProxy = ifac.getSliceProxy(ctx, new URL    ("https://ciena2-hn.exogeni.net:11443/orca/xmlrpc"));
+
+            s = Slice.loadManifestFile(sliceProxy, sliceName);
+            System.out.println("Slice state=" + s.getState());
+
+            ComputeNode c = (ComputeNode) s.getResourceByName("Node0");
+            System.out.println("Compute= " + c);
+
+            Collection<StorageNode> storageNodes = s.getStorageNodes();
+            List<StorageNode> storageNodesToBeRenewed = new LinkedList<>();
+            Collection<Interface> computeInterfaces  = c.getInterfaces();
+
+            System.out.println("Compute interfaces " + computeInterfaces);
+
+            for(StorageNode st: storageNodes) {
+                for(Interface i: st.getInterfaces()) {
+                    InterfaceNode2Net ifc = (InterfaceNode2Net)i;
+                    if(c.getInterface((RequestResource)ifc.getLink()) != null) {
+                        System.out.println("KOMAL");
+                    }
+                    else {
+                        System.out.println("Not found " +i);
+                    }
+                }
+            }
+
+
+        } catch (Exception e){
+            s.logger().debug("Failed to fetch manifest");
+            e.printStackTrace();
+            return;
+        }
+    }
 
     public static void testModifyWithStorage(String pem, String sliceName){
         Slice s = null;
@@ -1176,11 +1217,13 @@ public class TestDriver {
     //TestDriver.deleteAllSDXNetworks(args[0], "pruth.sdx.1");
     //TestDriver.setupSDXLinearNetwork(args[0],"pruth.sdx.1" );
     //TestDriver.testCreateSliceWithStorage(args[0]);
+    //TestDriver.testGetSliceState(args[0],"kthare10.slice1");
     //TestDriver.testModifyWithStorage(args[0],"kthare10.slice1");
-    TestDriver.testModifyDeleteStorage(args[0],"kthare10.slice1");
+    //TestDriver.testModifyDeleteStorage(args[0],"kthare10.slice1");
     //TestDriver.testSliceStatusWithStorage(args[0],"kthare10.slice1");
     //TestDriver.testDelete(args[0],"kthare10.slice1");
     //TestDriver.testNewSlice1(args[0]);
+    TestDriver.testGetSliceState(args[0],"Mobius-Exogeni-kthare10-7fa8e8a8-99c8-4b1b-a96e-aca4b61c8873");
     System.out.println("ndllib TestDriver: END");
     }
 }
