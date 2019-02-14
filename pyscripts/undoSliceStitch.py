@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.6
 
-import xmlrpclib
-import ConfigParser
+import ssl
+import xmlrpc.client
+import configparser
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -21,7 +22,7 @@ parser.add_option("-p", "--private-key", dest="privateKey",
                   help="Private key file (or a PEM file if contains both private key and cert)")
 (options, args) = parser.parse_args()
 
-class SafeTransportWithCert(xmlrpclib.SafeTransport):
+class SafeTransportWithCert(xmlrpc.client.SafeTransport):
      __cert_file = ""
      __key_file = ""
      _use_datetime = False
@@ -34,13 +35,13 @@ class SafeTransportWithCert(xmlrpclib.SafeTransport):
                        'key_file'  :  self.__key_file,
                        'cert_file' :  self.__cert_file
              } )
-         return  xmlrpclib.SafeTransport.make_connection(self,host_with_cert)
+         return  xmlrpc.client.SafeTransport.make_connection(self,host_with_cert)
 
 mandatories = ['fromSliceID', 'toSliceID', 'fromReservation', 'toReservation' ]
 
 for m in mandatories:
     if not options.__dict__[m]:
-        print "Mandatory option is missing\n"
+        print ("Mandatory option is missing\n")
         parser.print_help()
         exit(-1)
 
@@ -50,16 +51,17 @@ credentials = []
 
 if server_url.startswith('https://'):
     if options.cert == None or options.privateKey == None:
-        print "For using secure (https) transport, you must specify the path to your certificate and private key"
+        print ("For using secure (https) transport, you must specify the path to your certificate and private key")
         parser.print_help()
         exit(-1)
     # create secure transport with client cert
-    transport = SafeTransportWithCert(options.cert, options.privateKey)
-    server = xmlrpclib.Server(server_url, transport=transport)
+    context = ssl.SSLContext()
+    context.load_cert_chain(options.cert, options.privateKey)
+    server = xmlrpc.client.ServerProxy(server_url, context=context)
 else:
-    server = xmlrpclib.Server(server_url)
+    server = xmlrpc.client.ServerProxy(server_url)
 
 # Call the server and get our result.
-print "Issuing undo slice stitch command for reservation ... \n"
+print ("Issuing undo slice stitch command for reservation ... \n")
 result = server.orca.undoSliceStitch(options.fromSliceID, options.fromReservation, options.toSliceID, options.toReservation, credentials)
-print result
+print (result)
