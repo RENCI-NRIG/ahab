@@ -10,12 +10,8 @@ import org.renci.ahab.libndl.resources.request.RequestResource;
 
 public abstract class ModelResource {
 	protected SliceGraph sliceGraph;
+	protected Set<RequestResource> dependencies = new HashSet<RequestResource>();
 
-	protected Set<RequestResource> dependencies = new HashSet<RequestResource>(); 
-	//protected Set<Interface> interfaces = new HashSet<Interface>(); 
-	//protected Set<ManifestResource> instantiation = new HashSet<ManifestResource>();
-	
-	
 	protected NDLModel getNDLModel() {
 		if(sliceGraph == null) LIBNDL.logger().debug("ModelResource::getNDLModel sliceGraph is null");
 	
@@ -41,12 +37,7 @@ public abstract class ModelResource {
 
 	public void setName(String s) {
 		getNDLModel().setName(this);
-		//name = s;
 	}
 	
-	public abstract void delete(); 
-	//{
-	//	sliceGraph.deleteResource(this);
-	//}
-	
+	public abstract void delete();
 }

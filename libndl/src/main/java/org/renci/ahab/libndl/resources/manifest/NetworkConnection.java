@@ -76,49 +76,8 @@ public class NetworkConnection extends LinkConnection {
 		return bandwidth;
 	}
 	
-	/** 
-	 * Create a detailed printout of properties
-	 * @return
-	 */
-//	@Override
-//	public String getViewerText() {
-//		String viewText = "";
-//		viewText += "Node name: " + name;
-//		viewText += "\nNode reservation state: " + state;
-//		viewText += "\nReservation notice: " + (resNotice != null ? resNotice : NOT_SPECIFIED);
-//		if (label != null)
-//			viewText += "\nLabel/Tag: " + label;
-//		if (interfaces.size() > 0) {
-//			viewText += "\nInterfaces: ";
-//			for(Entry<OrcaNetwork, String> e: interfaces.entrySet()) {
-//				viewText += "\n    " + e.getKey().getName() + " : " + e.getValue();
-//			}
-//		}
-//		return viewText;
-//	}
-	
 	// is this crossconnect linked to shared storage?
     public boolean linkToSharedStorage() {
-    	
-//    	Collection<OrcaLink> iLinks = Request.getInstance().getGraph().getIncidentEdges(this);
-//		for(OrcaLink l: iLinks) {
-//			Pair<OrcaNode> pn = Request.getInstance().getGraph().getEndpoints(l);
-//			OrcaNode n = null;
-//			// find the non-crossconnect side
-//			if (!(pn.getFirst() instanceof OrcaBroadcastLink))
-//				n = pn.getFirst();
-//			else if (!(pn.getSecond() instanceof OrcaBroadcastLink))
-//				n = pn.getSecond();
-//			
-//			if (n == null) 
-//				continue;
-//			
-//			if (n instanceof OrcaStorageNode) {
-//				OrcaStorageNode snode = (OrcaStorageNode)n;
-//				if (snode.getSharedNetwork())
-//					return true;
-//			}
-//		}
 		return false;
     }
 

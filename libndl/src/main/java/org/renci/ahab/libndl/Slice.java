@@ -6,18 +6,14 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 
+import orca.ndl.NdlGenerator;
 import org.apache.log4j.Logger;
+import org.renci.ahab.libndl.ndl.NDLGenerator;
 import org.renci.ahab.libndl.ndl.RequestGenerator;
 import org.renci.ahab.libndl.resources.common.ModelResource;
-import org.renci.ahab.libndl.resources.request.BroadcastNetwork;
-import org.renci.ahab.libndl.resources.request.ComputeNode;
-import org.renci.ahab.libndl.resources.request.Interface;
-import org.renci.ahab.libndl.resources.request.Network;
-import org.renci.ahab.libndl.resources.request.Node;
-import org.renci.ahab.libndl.resources.request.RequestResource;
-import org.renci.ahab.libndl.resources.request.StitchPort;
-import org.renci.ahab.libndl.resources.request.StorageNode;
+import org.renci.ahab.libndl.resources.request.*;
 import org.renci.ahab.libndl.util.IP4Subnet;
 import org.renci.ahab.libtransport.AccessToken;
 import org.renci.ahab.libtransport.ISliceTransportAPIv1;
@@ -25,10 +21,9 @@ import org.renci.ahab.libtransport.SliceAccessContext;
 import org.renci.ahab.libtransport.util.ContextTransportException;
 import org.renci.ahab.libtransport.util.TransportException;
 import org.renci.ahab.libtransport.xmlrpc.XMLRPCTransportException;
-
 import edu.uci.ics.jung.graph.SparseMultigraph;
 
-
+import javax.annotation.Resource;
 
 public class Slice {
 	
@@ -55,9 +50,6 @@ public class Slice {
 		return Slice.loadRequest(readRDFFile(new File(fileName)));
 	}
 	
-	
-	
-	
 	public static Slice loadRequest(String requestRDFString){
 		Slice s = new Slice();
 		s.sliceGraph.loadRequestRDF(requestRDFString);
@@ -72,9 +64,6 @@ public class Slice {
 		s.setSliceProxy(sliceProxy);
 		return s;
 	}
-	
-	
-	
 
 	public static Slice loadManifestFile(String fileName){
 		return Slice.loadManifest(readRDFFile(new File(fileName)));
@@ -128,35 +117,33 @@ public class Slice {
 		return rawRDF;
 	}
 	
-	/************************ Private configuration methods ***************/
-	
-	
-	/************************ User API Methods ****************************/
-	
 	public ComputeNode addComputeNode(String name){
 		return sliceGraph.addComputeNode(name);
 	}
 
-	public StorageNode addStorageNode(String name){
-		return sliceGraph.addStorageNode(name);
+	public StorageNode addStorageNode(String name, long capacity, String mntPoint){
+		return sliceGraph.addStorageNode(name, capacity, mntPoint);
 	}
 
 	public StitchPort addStitchPort(String name, String label, String port, long bandwidth){
 		return sliceGraph.addStitchPort(name, label, port, bandwidth);	 
 	}
 	SparseMultigraph<RequestResource, Interface> g = new SparseMultigraph<RequestResource, Interface>();
-
-	//public Network addLink(String name){
-	//	return sliceGraph.addLink(name);
-	//}
-
 	
 	public BroadcastNetwork addBroadcastLink(String name, long bandwidth){
 		return sliceGraph.addBroadcastLink(name, bandwidth);
 	}
-	
+
 	public BroadcastNetwork addBroadcastLink(String name){
 		return this.addBroadcastLink(name,10000000l);
+	}
+
+	public LinkNetwork addLinkNetwork(String name, long bandwidth){
+		return sliceGraph.addLinkNetwork(name, bandwidth);
+	}
+
+	public LinkNetwork addLinkNetwork(String name){
+		return this.addLinkNetwork(name,10000000l);
 	}
 	
 	public RequestResource getResourceByName(String nm){
@@ -166,10 +153,6 @@ public class Slice {
 	public RequestResource getResouceByURI(String uri){
 		return sliceGraph.getResourceByURI(uri);
 	}
-	
-	//public void deleteResource(RequestResource r){
-	//	sliceGraph.deleteResource(r);
-	//}
 	
 	public Interface stitch(RequestResource r1, RequestResource r2){
 		LIBNDL.logger().error("slice.stitch is unimplemented");
@@ -215,8 +198,6 @@ public class Slice {
 			    Thread.currentThread().interrupt();
 			}
 		}while (!done && i < count);
-		
-		
 	}
 	
 	public void commit() throws XMLRPCTransportException{
@@ -268,7 +249,6 @@ public class Slice {
 		return stitching_GUID;
 	}
 	
-	/**************************** Get Slice Info ***********************************/
 	public Collection<ModelResource> getAllResources(){
 		return sliceGraph.getResources();
 	}
@@ -299,12 +279,7 @@ public class Slice {
 
 	public Collection<StitchPort> getStitchPorts(){
 		return sliceGraph.getStitchPorts();
-	}	
-	
-	public String getState(){
-		return "getState unimplimented";
 	}
-	
 	
 	public static Collection<String> getDomains(){
 		return RequestGenerator.domainMap.keySet();
@@ -313,8 +288,7 @@ public class Slice {
 	public void setSliceProxy(ISliceTransportAPIv1 sliceProxy) {
 		this.sliceProxy = sliceProxy;
 	}
-	/**************************** Load/Save Methods **********************************/
-	
+
 	private void save(String file){
 		sliceGraph.save(file);
 	}
@@ -323,19 +297,16 @@ public class Slice {
 		return sliceGraph.getRDFString();
 	}
 
-	/**************************** Logger Methods *************************************/
 	public Logger logger(){
 		return LIBNDL.logger();
 	}
 	
-	/***************************** Debug Methods **************/
 	public String getDebugString(){
 		return sliceGraph.getDebugString();
 	}
 	public String getSliceGraphString(){
 		return sliceGraph.getSliceGraphString();
 	}
-	/*****************************  Auto generatted methods to be sorted **************/
 	public Collection<Interface> getInterfaces(RequestResource requestResource) {
 		// TODO Auto-generated method stub
 		return null;
@@ -398,4 +369,110 @@ public class Slice {
 	        e.printStackTrace();
 	    }
 	}
+
+	// class to simplify the binning of
+	// reservation states
+	private static class StateBins {
+		public static final int MaxBins = 16;
+		private int[] bins = new int[MaxBins];
+
+		public void add(int s) {
+			if ((s >= 0) && (s < MaxBins))
+				bins[s]++;
+		}
+
+		/**
+		 * Does the specified state appear in the bin?
+		 *
+		 * @param s
+		 * @return
+		 */
+		public boolean hasState(int s) {
+			if ((s >= 0) && (s < MaxBins)) {
+				if (bins[s] > 0)
+					return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Do any other states, other than s appear in the bin?
+		 *
+		 * @param s
+		 * @return
+		 */
+		public boolean hasStatesOtherThan(int... s) {
+			int count = 0;
+			for (int i = 0; i < MaxBins; i++) {
+				if (bins[i] > 0)
+					count++;
+			}
+
+			int count1 = 0;
+			for (int i = 0; i < s.length; i++) {
+				if (bins[s[i]] > 0)
+					count1++;
+			}
+
+			if ((count1 == count) && (count > 0))
+				return false;
+			return true;
+		}
+	};
+
+
+
+    public boolean isSliceDead() {
+        StateBins b = new StateBins();
+        for (ModelResource r : getAllResources()) {
+            RequestResource requestResource = (RequestResource) r;
+            b.add(NDLGenerator.reservationStates.get(requestResource.getState()));
+        }
+        if (!b.hasStatesOtherThan(NDLGenerator.ReservationState.ReservationStateClosed.value,
+                NDLGenerator.ReservationState.ReservationStateCloseWait.value,
+                NDLGenerator.ReservationState.ReservationStateFailed.value))
+            return true;
+        return false;
+    }
+
+    public NDLGenerator.SliceState getState() {
+        StateBins b = new StateBins();
+
+        for (ModelResource r : getAllResources()) {
+            RequestResource requestResource = (RequestResource) r;
+            System.out.println("Resource=" + requestResource.getName() + " State=" + requestResource.getState());
+            b.add(NDLGenerator.reservationStates.get(requestResource.getState()));
+        }
+
+        // has only Active, ActiveTicketed, Closed or Ticketed reservations
+        if (!b.hasStatesOtherThan(NDLGenerator.ReservationState.ReservationStateActiveTicketed.value,
+                NDLGenerator.ReservationState.ReservationStateNascent.value,
+                NDLGenerator.ReservationState.ReservationStateActive.value,
+                NDLGenerator.ReservationState.ReservationStateTicketed.value) &&
+                (b.hasState(NDLGenerator.ReservationState.ReservationStateNascent.value) ||
+                b.hasState(NDLGenerator.ReservationState.ReservationStateTicketed.value) ||
+                b.hasState(NDLGenerator.ReservationState.ReservationStateActiveTicketed.value)))
+            return NDLGenerator.SliceState.CONFIGURING;
+
+        // has only Closed, Closing, Pending Close or Failed reservations
+        if (!b.hasStatesOtherThan(NDLGenerator.ReservationState.ReservationStateClosed.value,
+                NDLGenerator.ReservationState.ReservationStateCloseWait.value,
+                NDLGenerator.ReservationState.ReservationPendingStateClosing.value,
+                NDLGenerator.ReservationState.ReservationStateFailed.value))
+            return NDLGenerator.SliceState.CLOSING_DEAD;
+
+        // has only Active or Failed or Closed reservations
+        if ((!b.hasStatesOtherThan(NDLGenerator.ReservationState.ReservationStateActive.value,
+                NDLGenerator.ReservationState.ReservationStateFailed.value,
+                NDLGenerator.ReservationState.ReservationStateClosed.value)) &&
+                (b.hasState(NDLGenerator.ReservationState.ReservationStateFailed.value)))
+            return NDLGenerator.SliceState.STABLE_ERROR;
+
+        // has only Active or Closed reservartions
+        if (!b.hasStatesOtherThan(NDLGenerator.ReservationState.ReservationStateActive.value,
+                NDLGenerator.ReservationState.ReservationStateClosed.value))
+            return NDLGenerator.SliceState.STABLE_OK;
+
+        return NDLGenerator.SliceState.NULL;
+    }
 }

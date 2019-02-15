@@ -143,13 +143,18 @@ public abstract class Network extends RequestResource {
     			Node n = ((InterfaceNode2Net)i).getNode();
     			if(n instanceof ComputeNode){
     				int count = ((ComputeNode)n).getMaxNodeCount();
-    				
-    				int maskLength = ipSubnet.getMaskLength();
-    				String ip = ipSubnet.getFreeIPs(count).getHostAddress();
-    				String mask = IP4Subnet.netmaskIntToString(maskLength);
-    				LIBNDL.logger().debug("AutoIP for interface: count: " + count + ", maskLength: " + maskLength + ", mask: " + mask + ", ip: " + ip);
-    				((InterfaceNode2Net)i).setNetmask(mask);
-    				((InterfaceNode2Net)i).setIpAddress(ip);
+    				String ip = ((InterfaceNode2Net) i).getIpAddress();
+    				if(ip == null){
+						int maskLength = ipSubnet.getMaskLength();
+						ip = ipSubnet.getFreeIPs(count).getHostAddress();
+						String mask = IP4Subnet.netmaskIntToString(maskLength);
+						LIBNDL.logger().debug("AutoIP for interface: count: " + count + ", maskLength: " + maskLength + ", mask: " + mask + ", ip: " + ip);
+						((InterfaceNode2Net) i).setNetmask(mask);
+						((InterfaceNode2Net) i).setIpAddress(ip);
+					}
+					else {
+    					ipSubnet.markIPUsed(ip);
+					}
     			}
     		} else {
     			//unknown interface type

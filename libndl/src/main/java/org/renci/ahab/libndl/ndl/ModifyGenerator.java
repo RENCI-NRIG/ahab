@@ -3,13 +3,9 @@
 import orca.ndl.NdlCommons;
 import orca.ndl.NdlException;
 import orca.ndl.NdlGenerator;
-
 import org.renci.ahab.libndl.LIBNDL;
-import org.renci.ahab.libndl.SliceGraph;
 import org.renci.ahab.libndl.resources.request.ComputeNode;
-
 import com.hp.hpl.jena.ontology.Individual;
-//import com.hyperrealm.kiwi.ui.dialog.ExceptionDialog;
 
 /**
  * Generate a modify request
@@ -77,7 +73,6 @@ public class ModifyGenerator extends NDLGenerator{
 		}
 	}
 	
-	
 	/**
 	 * Add a  nodes 
 	 * 
@@ -86,7 +81,6 @@ public class ModifyGenerator extends NDLGenerator{
 		if (ngen == null)
 			createModifyRequest(null);
 		try {
-			//LIBNDL.logger().debug("ngen: " + ngen + ", modRes: " + modRes +", groupUrl: " + groupUrl + ", count: " + count);
 			Individual ni = ngen.declareServerCloud(cn.getName());
 			ngen.declareModifyElementAddElement(modRes, ni);
 			
@@ -123,17 +117,10 @@ public class ModifyGenerator extends NDLGenerator{
 			if ((cn.getPostBootScript() != null) && (cn.getPostBootScript().length() > 0)) {
 				ngen.addPostBootScriptToCE(cn.getPostBootScript(), ni);
 			}
-			
-			
-			
 		} catch (NdlException e) {
-			//LIBNDL.logger().debug("addNodesToGroup FAIL: ngen: " + ngen + ", modRes: " + modRes +", groupUrl: " + groupUrl + ", count: " + count);
-
 			return;
 		}
 	}
-	
-	
 	
 	/**
 	 * Add a count of nodes to a group
@@ -165,10 +152,6 @@ public class ModifyGenerator extends NDLGenerator{
 		try {
 			ngen.declareModifyElementNGDeleteNode(modRes, groupUrl, nodeUrl);
 		} catch (NdlException e) {
-//			ExceptionDialog ed = new ExceptionDialog(NDLLIB.getInstance().getFrame(), "Exception");
-//			ed.setLocationRelativeTo(NDLLIB.getInstance().getFrame());
-//			ed.setException("Exception encountered while converting graph to NDL-OWL: ", e);
-//			ed.setVisible(true);
 			return;
 		}
 	}
@@ -197,5 +180,4 @@ public class ModifyGenerator extends NDLGenerator{
 		// TODO Auto-generated method stub
 		
 	}
-	
 }

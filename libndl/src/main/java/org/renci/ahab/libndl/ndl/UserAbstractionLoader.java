@@ -22,29 +22,16 @@
 */
 package org.renci.ahab.libndl.ndl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import orca.ndl.INdlManifestModelListener;
-import orca.ndl.INdlRequestModelListener;
 import orca.ndl.NdlCommons;
 import orca.ndl.NdlManifestParser;
-import orca.ndl.NdlRequestParser;
-
 import org.apache.commons.lang.StringUtils;
 import org.renci.ahab.libndl.LIBNDL;
-import org.renci.ahab.libndl.Slice;
 import org.renci.ahab.libndl.SliceGraph;
 import org.renci.ahab.libndl.resources.common.ModelResource;
 import org.renci.ahab.libndl.resources.request.ComputeNode;
-import org.renci.ahab.libndl.resources.request.Interface;
 import org.renci.ahab.libndl.resources.request.InterfaceNode2Net;
 import org.renci.ahab.libndl.resources.request.Network;
 import org.renci.ahab.libndl.resources.request.Node;
@@ -52,17 +39,13 @@ import org.renci.ahab.libndl.resources.request.RequestReservationTerm;
 import org.renci.ahab.libndl.resources.request.RequestResource;
 import org.renci.ahab.libndl.resources.request.StitchPort;
 import org.renci.ahab.libndl.resources.request.StorageNode;
-
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.impl.PropertyImpl;
 
-
-import edu.uci.ics.jung.graph.SparseMultigraph;
 
 public class UserAbstractionLoader extends NDLLoader  implements INdlManifestModelListener {
 
@@ -74,8 +57,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		this.ndlModel = ndlModel;
 	}
 
-
-
 	/**
 	 * Load from string
 	 * @param f
@@ -85,11 +66,7 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		NdlManifestParser nrp;
 		try {
 			nrp = new NdlManifestParser(rdf, this);
-			//nrp.doLessStrictChecking(); //TODO: Should be removed...
-			//nrp.processRequest();
-			//nrp.freeModel();
 			nrp.processManifest();
-
 		} catch (Exception e) {
 			LIBNDL.logger().error(e);
 			LIBNDL.logger().debug("error loading graph");
@@ -99,9 +76,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		return nrp;
 	}
 
-
-
-
 	public void ndlReservation(Resource i, final OntModel m) {
 
 		LIBNDL.logger().debug("Reservation: " + i + ", sliceState(Request:ndlReservation) = " + NdlCommons.getGeniSliceStateName(i));
@@ -110,13 +84,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		String guid = StringUtils.removeEnd(StringUtils.removeStart(u, NdlCommons.ORCA_NS), "#");
 
 		this.sliceGraph.setNsGuid(guid);
-
-		//this.slice.setState(NdlCommons.getGeniSliceStateName(i));
-
-		/*if (i != null) {
-			reservationDomain = RequestSaver.reverseLookupDomain(NdlCommons.getDomain(i));
-			this.sliceGraph.setOFVersion(NdlCommons.getOpenFlowVersion(i));
-		}*/
 	}
 
 	public void ndlReservationEnd(Literal e, OntModel m, Date end) {
@@ -147,51 +114,36 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 	public void ndlNode(Resource ce, OntModel om, Resource ceClass, List<Resource> interfaces) {
 		try {
 			LIBNDL.logger().debug("UserAbstractionLoader::ndlNode");
-			LIBNDL.logger().debug("UserAbstractionLoader::ndlNode, Node: " + ce + " of class " + ceClass + ", ce objext class: " + ce.getClass());
-
 			if (ce == null)
 				return;
 
+			LIBNDL.logger().debug("UserAbstractionLoader::ndlNode, Node: " + ce + " of class " + ceClass + ", ce objext class: " + ce.getClass());
+
 			Node newNode;
 			ComputeNode newComputeNode = null;
-			if (ceClass.equals(NdlCommons.computeElementClass)){
-				//if(!ce.hasProperty(NdlCommons.manifestHasParent)){
+			if (ceClass != null && ceClass.equals(NdlCommons.computeElementClass)){
 				LIBNDL.logger().debug("BUILDING: Compute Node: " + this.getPrettyName(ce) + " : found computeElementClass, parent = " + ce.hasProperty(NdlCommons.manifestHasParent));
 				newNode = this.sliceGraph.buildComputeNode(this.getPrettyName(ce));
 				newComputeNode = (ComputeNode)newNode;
-
-
 
 				ndlModel.mapRequestResource2ModelResource(newNode, ce);
 				LIBNDL.logger().debug("newComputeNode.getName(): " + newNode.getName());
 				Resource returnedResource = ndlModel.getModelResource(newNode);
 				LIBNDL.logger().debug("returnedResource.getLocalName(): " + returnedResource.getLocalName());
 				ndlModel.printRequest2NDLMap();
-
-
-
-			} else if (ceClass.equals(NdlCommons.serverCloudClass)) {
+			} else if (ceClass != null && ceClass.equals(NdlCommons.serverCloudClass)) {
 				LIBNDL.logger().debug("BUILDING: Group Node: " + ce.getLocalName() + " : found serverCloudClass, parent = " + ce.hasProperty(NdlCommons.manifestHasParent));
 				ComputeNode newNodeGroup = this.sliceGraph.buildComputeNode(ce.getLocalName());
 				ndlModel.mapRequestResource2ModelResource(newNodeGroup, ce);
-				//newNodeGroup.setNDLModel(ndlModel);
-				//ndlModel.mapSliceResource2ModelResource(newNodeGroup, ce);
 				newComputeNode = newNodeGroup;
-				//int ceCount = NdlCommons.getNumCE(ce);
-				//if (ceCount > 0) newNodeGroup.setNodeCount(ceCount);
 				newNodeGroup.initializeNodeCount(0);
-				//newNodeGroup.setSplittable(NdlCommons.isSplittable(ce));
 				newNode = newNodeGroup;
-
 
 				String groupUrl = NdlCommons.getRequestGroupURLProperty(ce);
 				LIBNDL.logger().debug("NdlCommons.getRequestGroupURLProperty: " + groupUrl);
 
 				String nodeUrl = ce.getURI();
 				LIBNDL.logger().debug("URI: " + nodeUrl);
-
-
-
 			} else if (NdlCommons.isNetworkStorage(ce)) {
 				LIBNDL.logger().debug("BUILDING: Storage Node: " + ce.getLocalName() );
 				// storage node
@@ -204,18 +156,8 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 				LIBNDL.logger().debug("\n\n\n ************************************** FOUND STITCHPORT NODE *************************************** \n\n\n");
 				LIBNDL.logger().debug("Found a stitchport");
 
-				//StitchPort
 				Resource sp = ce;
-
-				//LIBNDL.logger().debug("&&&&&&&&&&&&&&&&&&&&&&&& StitchPort uri" + ce.getURI());
-				//LIBNDL.logger().debug("&&&&&&&&&&&&&&&&&&&&&&&& StitchPort id" + ce.getId());
 				Iterator i;
-				//for (i = om.listStatements(null, new PropertyImpl("http://geni-orca.renci.org/owl/topology.owl#hasInterface"), (RDFNode) sp); i.hasNext();){
-				//	Statement st = (Statement) i.next();
-				//	LIBNDL.logger().debug("FOUND Statement subject: " + st.getSubject() + ", predicate: " + st.getPredicate() + ", resource  " + st.getResource());
-				//}
-
-
 				//get Interface
 				Resource spIface = null;
 				//get the interface
@@ -224,9 +166,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 				} else {
 					LIBNDL.logger().error("StitchPort: " + ce.getLocalName() + ", has wrong number in interfaces (" + interfaces.size() + ")");
 				}
-				//LIBNDL.logger().debug("StitchPort: " + ce.getLocalName() + ", " + ce.getURI());
-				//LIBNDL.logger().debug("Interface = " + spIface.getLocalName() + ", " + spIface.getURI());
-
 				LIBNDL.logger().debug("Looking for linkconnection");
 				//get LinkConnection (thing that sit between an interface and a link... why?)
 				Resource spLinkConnection = null;
@@ -235,28 +174,12 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 					Statement st = (Statement) i.next();
 					LIBNDL.logger().debug("FOUND Statement subject: " + st.getSubject() + ", predicate: " + st.getPredicate() + ", resource  " + st.getResource());
 
-					//if (!st.getSubject().equals(sp)) {
 					if(isType(st.getSubject(),NdlCommons.topologyNetworkConnectionClass)){
 						LIBNDL.logger().debug("XXXXXXXXXXXXXXXX SETTING  LinkConnection resource: " + st.getSubject());
 						spLinkConnection = st.getSubject();
 						break;
 					}
 				}
-
-
-				//LIBNDL.logger().debug("StitchPort: " + ce.getLocalName() + ", " + ce.getURI());
-				//LIBNDL.logger().debug("Interface = " + spIface.getLocalName() + ", " + spIface.getURI());
-				//LIBNDL.logger().debug("LinkConnection: " + spLinkConnection.getLocalName() + ", " + spLinkConnection.getURI());
-				//LIBNDL.logger().debug("LinkConnection: " + spLinkConnection);
-				//LIBNDL.logger().debug("LinkConnection: TYPE: " + spLinkConnection.getProperty(new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")));
-
-				//i = spLinkConnection.listProperties();
-				//while (i.hasNext()){
-				//	LIBNDL.logger().debug("Property: " + i.next());
-				//}
-
-
-
 				LIBNDL.logger().debug("Looking for linkconnectioniface");
 				//Get Link connection iface (the interface between the linkconnection and the link
 				Resource spLinkConnectionIface = null;
@@ -269,54 +192,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 						break;
 					}
 				}
-
-
-				//LIBNDL.logger().debug("StitchPort: " + ce.getLocalName() + ", " + ce.getURI());
-				//LIBNDL.logger().debug("Interface = " + spIface.getLocalName() + ", " + spIface.getURI());
-				//LIBNDL.logger().debug("LinkConnectionIface: " + spLinkConnectionIface.getLocalName() + ", " + spLinkConnectionIface.getURI());
-				//LIBNDL.logger().debug("LinkConnectionIface: TYPE: " + spLinkConnectionIface.getProperty(new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")));
-
-
-
-				//i = spLinkConnectionIface.listProperties();
-				//while (i.hasNext()){
-				//	LIBNDL.logger().debug("Property: " + i.next());
-				//}
-
-
-				//inRequestNetworkConnection
-
-//				//Get stichport in request
-//				LIBNDL.logger().debug("GET spRequest: BEGIN");
-//				Resource spRequest = null;
-//				for (i = om.listStatements(null, new PropertyImpl("http://geni-orca.renci.org/owl/topology.owl#hasInterface"), (RDFNode) spLinkConnectionIface); i.hasNext();){
-//					Statement st = (Statement) i.next();
-//					LIBNDL.logger().debug("FOUND Statement subject: " + st.getSubject() + ", predicate: " + st.getPredicate() + ", resource  " + st.getResource());
-//
-//					if(isType(st.getSubject(),NdlCommons.deviceOntClass)){
-//						spRequest = st.getSubject();
-//						break;
-//					}
-//				}
-//				LIBNDL.logger().debug("GET spRequest: END");
-//
-//
-//
-//				//Get Link
-//				Resource spLink = null;
-//				for (i = om.listStatements(null, new PropertyImpl("http://geni-orca.renci.org/owl/topology.owl#hasInterface"), (RDFNode) spLinkConnectionIface); i.hasNext();){
-//					Statement st = (Statement) i.next();
-//					LIBNDL.logger().debug("FOUND Statement subject: " + st.getSubject() + ", predicate: " + st.getPredicate() + ", resource  " + st.getResource());
-//
-//					if (st.getSubject().equals(spLinkConnectionIface)) {
-//						//LIBNDL.logger().debug("XXXXXXXXXXXXX SETTING Link resource: " + st.getResource());
-//						spLink = st.getSubject();
-//						break;
-//					}
-//				}
-
-
-				//inRequestNetworkConnection
 
 				//Get stichport in request
 				LIBNDL.logger().debug("GET spRequest: BEGIN");
@@ -331,30 +206,10 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 					}
 				}
 				LIBNDL.logger().debug("GET spRequest: END");
-
-
-
-
-				//LIBNDL.logger().debug("StitchPort: " + ce.getLocalName() + ", " + ce.getURI());
-				//LIBNDL.logger().debug("Interface = " + spIface.getLocalName() + ", " + spIface.getURI());
-				//LIBNDL.logger().debug("Link: " + spLink.getLocalName() + ", " + spLink.getURI());
-				//LIBNDL.logger().debug("Link: TYPE: " + spLink.getProperty(new PropertyImpl("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")));
-
-
 				LIBNDL.logger().debug("StitchPort (Request) = " + spRequest.getLocalName() + ", " + spRequest.getURI());
 
 				String spName = spRequest.getLocalName();
-				//String spName = spLink.getLocalName().substring(0, spLink.getLocalName().indexOf("-net") - 1);
-				//String spName = ce.getLocalName();
-
 				LIBNDL.logger().debug("StitchPort Name: " + spName);
-
-				//Statement st = ce.getProperty(new PropertyImpl("http://geni-orca.renci.org/owl/topology.owl#hasURL"));
-				//st.getObject();
-				//st.getString();
-
-				//LIBNDL.logger().debug(printStr);
-
 				String label = null;
 				String port = null;
 				if (interfaces.size() == 1 && NdlCommons.getLinkTo(interfaces.get(0)) != null){
@@ -383,8 +238,7 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 				//newNode.setDomain(RequestGenerator.reverseLookupDomain(domain));
 			}
 
-
-			if (ceClass.equals(NdlCommons.computeElementClass) || ceClass.equals(NdlCommons.serverCloudClass)){
+			if (ceClass != null && (ceClass.equals(NdlCommons.computeElementClass) || ceClass.equals(NdlCommons.serverCloudClass))){
 				Resource ceType = NdlCommons.getSpecificCE(ce);
 				if (ceType != null){
 					newComputeNode.setNodeType(RequestGenerator.reverseNodeTypeLookup(ceType));
@@ -393,7 +247,7 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 
 			//process image
 			LIBNDL.logger().debug("about to load image");
-			if (ceClass.equals(NdlCommons.computeElementClass) || ceClass.equals(NdlCommons.serverCloudClass)){
+			if (ceClass != null && (ceClass.equals(NdlCommons.computeElementClass) || ceClass.equals(NdlCommons.serverCloudClass))){
 				LIBNDL.logger().debug("about to load domain: it is a compute element");
 				// disk image
 				Resource di = NdlCommons.getDiskImage(ce);
@@ -402,9 +256,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 					try {
 						String imageURL = NdlCommons.getIndividualsImageURL(ce);
 						String imageHash = NdlCommons.getIndividualsImageHash(ce);
-						//String imName = this.sliceGraph.buildImage(new OrcaImage(di.getLocalName(),
-						//		new URL(imageURL), imageHash), null);
-						//String imName = imageURL + imageHash;  //FIX ME: not right
 						String imName = newComputeNode.getName() + "-image"; //FIX ME: not right:  why do we even have an image name???
 						newComputeNode.setImage(imageURL,imageHash,imName);
 					} catch (Exception e) {
@@ -433,21 +284,15 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 			long bandwidth, long latency, List<Resource> interfaces) {
 
 		LIBNDL.logger().debug("NetworkConnection: " + l);
-
-		// LIBNDL.logger().debug("Found connection " + l + " connecting " + interfaces + " with bandwidth " + bandwidth);
 		if (l == null)
 			return;
 
-
-		//om.listStatements(null, null, l);
  		LIBNDL.logger().debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     ndlNetworkConnection     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ");
- 		//NdlCommons.getResourceType(r)
  		if (NdlCommons.isLinkConnection(l)){
  			LIBNDL.logger().debug("NdlCommons.isLinkConnection(l)");
  		} else {
  			LIBNDL.logger().debug("NOT NdlCommons.isLinkConnection(l)");
  		}
-
 
  		//super hack to pre-calculate state because parts of model close after parsing
  		LIBNDL.logger().debug("looking for statements: begin");
@@ -456,8 +301,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
  		for (i = om.listStatements(null, NdlCommons.inRequestNetworkConnection, (RDFNode) l); i.hasNext();){
     		Statement st = (Statement) i.next();
     		LIBNDL.logger().debug("FOUND Statement subject: " + st.getSubject() + ", predicate: " + st.getPredicate() + ", resource  " + st.getResource());
-    		//LIBNDL.logger().debug("resource type: " + getType(st.getSubject()));
-
     		if (isType(st.getSubject(),NdlCommons.topologyCrossConnectClass)) {
 
     			LIBNDL.logger().debug("adding vlan: " + st.getSubject());
@@ -490,7 +333,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 
 		//hack
 		LIBNDL.logger().debug("Setting state = " + state);
-		//ol.setState(state);
 	}
 
 	public void ndlInterface(Resource intf, OntModel om, Resource conn, Resource node, String ip, String mask) {
@@ -513,16 +355,12 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		}
 		RequestResource olink = null;
 		if(conn != null){
-			//LIBNDL.logger().debug("Getting olink pretty name: " + this.getPrettyName(conn));
-			//olink = this.sliceGraph.getResourceByName(this.getPrettyName(conn));
 			LIBNDL.logger().debug("Getting olink pretty name from iface name: " + this.getPrettyNamOfLinkFromInterface(intf));
 			olink = this.sliceGraph.getResourceByName(this.getPrettyNamOfLinkFromInterface(intf));
 			LIBNDL.logger().debug("olink = " + olink);
 		} else{
 			LIBNDL.logger().warn("ndlInterface with null connection: " + intf);
 			LIBNDL.logger().debug("intf.getLocalName: " + intf.getLocalName());
-			//LIBNDL.logger().debug("intf.getURI: " + intf.getURI());
-			//LIBNDL.logger().debug("intf.getId: " + intf.getId());
 
 			//Super hack that needs to be fixed in NDL
 			//if the connection is null assume its interdomain and find the link name by parsing the interface name
@@ -530,7 +368,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 			olink = this.sliceGraph.getResourceByName(intf.getLocalName().split("-")[0]);
 			//end hack
 		}
-
 
 		if(onode == null){
 			LIBNDL.logger().warn("ndlInterface with null missing node:  Interface: " + intf + ", Node: " + node);
@@ -549,31 +386,14 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		//StorageNode
 		if(onode instanceof StorageNode){
 			LIBNDL.logger().debug("stitching storage node");
-			//InterfaceNode2Net stitch = (InterfaceNode2Net)onode.stitch(olink);
 			InterfaceNode2Net stitch = sliceGraph.buildInterfaceNode2Net((Node)onode, (Network)olink);
-
 			return;
 		}
-
-		//StitchPort
-//		if(onode instanceof StitchPort){
-//			LIBNDL.logger().debug("stitching stitchport");
-//			//Why is this stuff stored in the interface?
-//			//It Seems like they are properties of the stitchport itself.
-//			StitchPort sp = (StitchPort)onode;
-//			sp.setPort(intf.toString());
-//			sp.setLabel(NdlCommons.getLayerLabelLiteral(intf));
-//
-//			//InterfaceNode2Net stitch = (InterfaceNode2Net)onode.stitch(olink);
-//			InterfaceNode2Net stitch = sliceGraph.buildInterfaceNode2Net((Node)onode, (Network)olink);
-//			return;
-//		}
 
 		}catch (Exception e){
 			LIBNDL.logger().debug("PRUTH-Interface: Exception: " + e.getMessage() );
 			e.printStackTrace();
 		}
-
 
 		//shouldnt get here
 		LIBNDL.logger().debug("Stitching to unknown node type: " + node + ", " + node.getClass());
@@ -596,7 +416,6 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 					(this.sliceGraph.getOfSlicePass() == null) ||
 					(this.sliceGraph.getOfCtrlUrl() == null)) {
 					// disable OF if invalid parameters
-					//this.sliceGraph.setNoOF();
 					this.sliceGraph.setOfCtrlUrl(null);
 					this.sliceGraph.setOfSlicePass(null);
 					this.sliceGraph.setOfUserEmail(null);
@@ -612,20 +431,10 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		LIBNDL.logger().debug("Done parsing.");
 		// set term etc
 		this.sliceGraph.setTerm(term);
-		//this.sliceGraph.setDomainInReservation(reservationDomain);
 	}
 
 	public void ndlNodeDependencies(Resource ni, OntModel m, Set<Resource> dependencies) {
 		LIBNDL.logger().debug("nlNodeDependencies -- SKIPPED");
-
-		/*OrcaNode mainNode = nodes.get(ni.getURI());
-		if ((mainNode == null) || (dependencies == null))
-			return;
-		for(Resource r: dependencies) {
-			OrcaNode depNode = nodes.get(r.getURI());
-			if (depNode != null)
-				mainNode.buildDependency(depNode);
-		}*/
 	}
 
 	/**
@@ -643,71 +452,63 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		ol.setLabel(NdlCommons.getLayerLabelLiteral(bl));
 	}
 
-
 	/**
 	 * Hacks that should be in ndlcommons
 	 */
 
 	// sometimes getLocalName is not good enough
-		// so we strip off orca name space and call it a day
-		private String getTrueName(Resource r) {
-			if (r == null)
-				return null;
+    // so we strip off orca name space and call it a day
+    private String getTrueName(Resource r) {
+        if (r == null)
+            return null;
 
-			return StringUtils.removeStart(r.getURI(), NdlCommons.ORCA_NS);
-		}
-		protected String getPrettyName(Resource r) {
-			String rname = getTrueName(r);
-			LIBNDL.logger().debug("in getPrettyName. rname: " + rname);
-			int start_index = rname.indexOf('#');
-			int end_index = rname.indexOf('/');
-			if(start_index > 0 && end_index == -1){
-				rname = rname.substring(start_index + 1);
-			} else if (start_index > 0 && end_index > 0 && end_index > start_index) {
-				rname = rname.substring(start_index + 1,end_index);
-			}
-			return rname;
-		}
+        return StringUtils.removeStart(r.getURI(), NdlCommons.ORCA_NS);
+    }
+    protected String getPrettyName(Resource r) {
+        String rname = getTrueName(r);
+        LIBNDL.logger().debug("in getPrettyName. rname: " + rname);
+        int start_index = rname.indexOf('#');
+        int end_index = rname.indexOf('/');
+        if(start_index > 0 && end_index == -1){
+            rname = rname.substring(start_index + 1);
+        } else if (start_index > 0 && end_index > 0 && end_index > start_index) {
+            rname = rname.substring(start_index + 1,end_index);
+        }
+        return rname;
+    }
 
-		//Super hack to get link from from interface uri
-		protected String getPrettyNamOfLinkFromInterface(Resource r) {
-			String rname = r.toString();
-			LIBNDL.logger().debug("in getPrettyNamOfLinkFromInterface rname: " + rname);
+    //Super hack to get link from from interface uri
+    protected String getPrettyNamOfLinkFromInterface(Resource r) {
+        String rname = r.toString();
+        LIBNDL.logger().debug("in getPrettyNamOfLinkFromInterface rname: " + rname);
 
-			int start_index = rname.indexOf('#');
-			if (start_index > 0){
-				rname = rname.substring(start_index+1);
-			} else {
-				return null;
-			}
+        int start_index = rname.indexOf('#');
+        if (start_index > 0){
+            rname = rname.substring(start_index+1);
+        } else {
+            return null;
+        }
 
-			int end_index = rname.indexOf('-');
-			if(end_index == -1){
-				return rname;
-			} else {
-				rname = rname.substring(0,end_index);
-			}
-			return rname;
-		}
-
-		/****************************************************/
+        int end_index = rname.indexOf('-');
+        if(end_index == -1){
+            return rname;
+        } else {
+            rname = rname.substring(0,end_index);
+        }
+        return rname;
+    }
 
 	@Override
 	public void ndlManifest(Resource i, OntModel m) {
 		LIBNDL.logger().debug("UserAbstractionLoader::ndlManifest, OntModel m = " + m);
 		ndlModel.setJenaModel(m);
-
-
 	}
-
-
 
 	@Override
 	public void ndlLinkConnection(Resource l, OntModel m, List<Resource> interfaces, Resource parent) {
 		// TODO Auto-generated method stub
 
 	}
-
 
 	private ArrayList<Resource> crossConnects = null;
 	@Override
@@ -721,15 +522,9 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 		crossConnects.add(c);
 	}
 
-
-
 	@Override
 	public void ndlNetworkConnectionPath(Resource c, OntModel m, List<List<Resource>> path, List<Resource> roots) {
 		// TODO Auto-generated method stub
 
 	}
-
-
-
-
 }
