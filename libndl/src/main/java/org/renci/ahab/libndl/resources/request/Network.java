@@ -27,6 +27,9 @@ import org.renci.ahab.libndl.Slice;
 import org.renci.ahab.libndl.SliceGraph;
 import org.renci.ahab.libndl.util.IP4Subnet;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public abstract class Network extends RequestResource {
 	//default size for auto ip
 	private static int DEFAULT_SIZE = 256;
@@ -136,7 +139,28 @@ public abstract class Network extends RequestResource {
     	if (ipSubnet == null){
     		ipSubnet = sliceGraph.allocateSubnet(Network.DEFAULT_SIZE);
     	}
-    	
+
+    	// Reload Network subnet for existing allocated IPs
+        // Only executed in case of modifySlice and needed to ensure that
+        // already assigned IPs are not reassigned
+        for (Interface i : this.getInterfaces()){
+            LIBNDL.logger().debug("AutoIP for interface: " + i);
+            if (i instanceof InterfaceNode2Net){
+                Node n = ((InterfaceNode2Net)i).getNode();
+                if(n instanceof ComputeNode){
+                    int count = ((ComputeNode)n).getMaxNodeCount();
+                    String ip = ((InterfaceNode2Net) i).getIpAddress();
+                    if(ip != null) {
+                        LIBNDL.logger().debug("IP already assigned= " + ip);
+                        ipSubnet.markIPUsed(ip);
+                    }
+                }
+            } else {
+                //unknown interface type
+                LIBNDL.logger().warn("Unkown interface type. Can not autoIP for interface: " + i.toString());
+            }
+        }
+
     	for (Interface i : this.getInterfaces()){
     		LIBNDL.logger().debug("AutoIP for interface: " + i);
     		if (i instanceof InterfaceNode2Net){
@@ -151,9 +175,6 @@ public abstract class Network extends RequestResource {
 						LIBNDL.logger().debug("AutoIP for interface: count: " + count + ", maskLength: " + maskLength + ", mask: " + mask + ", ip: " + ip);
 						((InterfaceNode2Net) i).setNetmask(mask);
 						((InterfaceNode2Net) i).setIpAddress(ip);
-					}
-					else {
-    					ipSubnet.markIPUsed(ip);
 					}
     			}
     		} else {
