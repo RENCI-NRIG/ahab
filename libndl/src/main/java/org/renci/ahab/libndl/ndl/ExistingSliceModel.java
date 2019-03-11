@@ -28,14 +28,14 @@ public class ExistingSliceModel extends NDLModel{
 
 	/* map of RequestResource in original slice or request to ndl Resource */
 	protected Map<RequestResource,Resource> slice2NDLMap;
-	
-	
+
+
 	public ExistingSliceModel() {
 		super();
 	}
 
 	public void init(SliceGraph sliceGraph, String rdf){
-		
+
 		try{
 			UserAbstractionLoader uloader = new UserAbstractionLoader(sliceGraph,this);
 			sliceModel = uloader.load(rdf);
@@ -47,7 +47,7 @@ public class ExistingSliceModel extends NDLModel{
 			LIBNDL.logger().debug("Fail: ExistingSliceModel::init");
 		}
 	}
-	
+
 	public boolean isNewSlice(){ return false; };
 
 	protected void mapSliceResource2ModelResource(RequestResource r, Resource i){
@@ -63,7 +63,7 @@ public class ExistingSliceModel extends NDLModel{
         ModifyGenerator saver = new ModifyGenerator(ngen);
         return saver.getModifyRequest();
     }
-	
+
 	@Override
 	public void add(ComputeNode cn, String name) {
 		logger().debug("ExistingSliceModel:add(ComputeNode)");
@@ -76,8 +76,8 @@ public class ExistingSliceModel extends NDLModel{
 			ngen.declareModifyElementAddElement(reservation, ni);
 		} catch (NdlException e) {
 			logger().error("NewSliceModel:add(ComputeNode):" + e.getStackTrace());
-		}	
-		
+		}
+
 	}
 
     @Override
@@ -107,10 +107,10 @@ public class ExistingSliceModel extends NDLModel{
 			ngen.declareModifyElementAddElement(reservation, ci);
 		} catch (NdlException e) {
 			logger().error("ExistingSliceModel:add(ComputeNode):" + e.getStackTrace());
-		}	
+		}
 	}
 
-	@Override 
+	@Override
 	public void add(StitchPort sp, String name, String label, String port) {
         logger().debug("add(StitchPort sp) sp: " + sp);
         Individual ni = null;
@@ -150,9 +150,14 @@ public class ExistingSliceModel extends NDLModel{
         }
 
     }
-	
+
 	@Override
-	public void add(InterfaceNode2Net i) { 
+	public void add(InterfaceStitchPort2StitchPort i){
+		logger().debug("ExistingSliceModel add(InterfaceStitchPort2StitchPort) i: " + i + ", not implemented");
+	}
+
+	@Override
+	public void add(InterfaceNode2Net i) {
 		logger().debug("ExistingSliceModel:add(InterfaceNode2Net)");
 		Resource r = this.getModelResource(i);
 		Node node = i.getNode();
@@ -175,7 +180,7 @@ public class ExistingSliceModel extends NDLModel{
 				ngen.declareModifyElementAddElement(reservation, blI);
 			}
 			logger().debug("ExistingSliceModel:add(InterfaceNode2Net) 140:  blI: " + blI);
-			
+
 			Individual nodeI;
 			if (node.isNew()){
 				//New nodes
@@ -186,7 +191,7 @@ public class ExistingSliceModel extends NDLModel{
 				nodeI = ngen.declareModifiedComputeElement(node.getURL(), node.getGUID());
 				ngen.declareModifyElementModifyNode(reservation, nodeI);
 			}
-				
+
 			logger().debug("ExistingSliceModel:add(InterfaceNode2Net) 150:  nodeI:  " + nodeI);
 			Individual intI;
 			intI = ngen.declareInterface(net.getName()+"-"+node.getName());
@@ -285,14 +290,14 @@ public class ExistingSliceModel extends NDLModel{
 
 	@Override
 	public void remove(BroadcastNetwork bn) {
-		
+
 		logger().debug("ExistingSliceModel::remove(BroadcastNetwork bn): " +   bn.getURL() + ", " + bn.getGUID());
-		
+
 		//TODO:  fix that it only removes Interfaces to nodes
 		for (Interface i : bn.getInterfaces()){
 			//this.remove((InterfaceNode2Net)i);
 		}
-		
+
 		try{
 			ngen.declareModifyElementRemoveLink(reservation, bn.getURL(), bn.getGUID());
 		} catch (NdlException e) {
@@ -310,13 +315,13 @@ public class ExistingSliceModel extends NDLModel{
 	public void remove(InterfaceNode2Net i) {
 		// TODO Auto-generated method stub
 		Resource ni = this.getModelResource(i);
-		
+
 		try{
 			ngen.declareModifyElementRemoveNode(reservation, i.getURL(), i.getGUID());
 		} catch (NdlException e) {
 			logger().error("ExistingSliceModel::remove(BroadcastNetwork bn), Failed to declareModifyElementRemoveLink" );
 			e.printStackTrace();
-		}	
+		}
 	}
 
 	@Override

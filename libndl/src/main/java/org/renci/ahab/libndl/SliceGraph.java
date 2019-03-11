@@ -1,23 +1,23 @@
 /*
-* Copyright (c) 2011 RENCI/UNC Chapel Hill 
+* Copyright (c) 2011 RENCI/UNC Chapel Hill
 *
 * @author Ilia Baldine
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
-* and/or hardware specification (the "Work") to deal in the Work without restriction, including 
-* without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
-* sell copies of the Work, and to permit persons to whom the Work is furnished to do so, subject to 
-* the following conditions:  
-* The above copyright notice and this permission notice shall be included in all copies or 
-* substantial portions of the Work.  
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+* and/or hardware specification (the "Work") to deal in the Work without restriction, including
+* without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+* sell copies of the Work, and to permit persons to whom the Work is furnished to do so, subject to
+* the following conditions:
+* The above copyright notice and this permission notice shall be included in all copies or
+* substantial portions of the Work.
 *
-* THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-* OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
+* THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
 * IN THE WORK.
 */
 
@@ -49,7 +49,7 @@ import edu.uci.ics.jung.graph.SparseMultigraph;
  *
  */
 public class SliceGraph   {
-	private Slice slice; 
+	private Slice slice;
 	private NDLModel ndlModel;
 	private SparseMultigraph<ModelResource, Interface> sliceGraph = new SparseMultigraph<ModelResource, Interface>();
 	private SparseMultigraph<ManifestResource, Interface> manifestGraph = new SparseMultigraph<ManifestResource, Interface>();
@@ -63,33 +63,33 @@ public class SliceGraph   {
 	public static final String NO_NODE_DEPS="No dependencies";
 	private static final String RDF_START = "<rdf:RDF";
 	private static final String RDF_END = "</rdf:RDF>";
-	
+
 	// is it openflow (and what version [null means non-of])
 	private String ofNeededVersion = null;
 	private String ofUserEmail = null;
 	private String ofSlicePass = null;
 	private String ofCtrlUrl = null;
-	
+
 	// File in which we save
 	File saveFile = null;
-	
+
 	// Reservation details
 	private RequestReservationTerm term;
 	private String resDomainName = null;
-	
+
 	// save the guid of the namespace of the request if it was loaded
 	String nsGuid = null;
-	
+
 	private static void initialize() {
 		;
 	}
 
-	
+
 	public SliceGraph(Slice slice) {
 		// clear the graph, reservation set else to defaults
 		if (sliceGraph == null)
 			return;
-		
+
 		Set<ModelResource> resources = new HashSet<ModelResource>(sliceGraph.getVertices());
 		for (ModelResource r: resources)
 			sliceGraph.removeVertex(r);
@@ -102,20 +102,20 @@ public class SliceGraph   {
 		nsGuid = null;
 		saveFile = null;
 		rawLoadedRDF = null;
-		
+
 		ipAssign = new IP4Assign();
 		this.slice = slice;
-		
+
 	}
-	
+
 	public Collection<ModelResource> getResources(){
 		return sliceGraph.getVertices();
 	}
-	
+
 	protected SparseMultigraph<ModelResource, Interface> getGraph() {
 		return sliceGraph;
 	}
-	
+
 	public void printGraph() {
 		LIBNDL.logger().debug("JUNG Graph: " + sliceGraph);
 	}
@@ -124,7 +124,7 @@ public class SliceGraph   {
 		if(ndlModel == null) LIBNDL.logger().debug("SliceGraph.getNDLModel ndlModel is null");
 		return ndlModel;
 	}
-	
+
 	public String enableSliceStitching(RequestResource r, String secret){
 		return slice.enableSliceStitching(r, secret);
 	}
@@ -132,7 +132,7 @@ public class SliceGraph   {
 	public void increaseComputeNodeCount(ComputeNode node, int addCount){
 		//modify.addNodesToGroup(node.getModelResource().getURI(), addCount);
 	}
-	
+
 	//deletes the node at uri from the group node
 	public void deleteComputeNode(ComputeNode node, String uri){
 		LIBNDL.logger().debug("Request.deleteComputeNode: node = " + node + ", uri = " + uri);
@@ -152,7 +152,7 @@ public class SliceGraph   {
         return node;
     }
 	public StorageNode buildStorageNode(String name, long capacity, String mntPoint){
-		LIBNDL.logger().debug("PRUTH_BUILD: SliceGraph.buildStorageNode: adding node " + name);	
+		LIBNDL.logger().debug("PRUTH_BUILD: SliceGraph.buildStorageNode: adding node " + name);
 		StorageNode node = new StorageNode(this, name);
 		node.setCapacity(capacity);
 		node.setMntPoint(mntPoint);
@@ -180,18 +180,18 @@ public class SliceGraph   {
         sliceGraph.addVertex(link);
         return link;
     }
-	
+
 	public InterfaceNode2Net buildInterfaceNode2Net(Node node, Network net){
 		LIBNDL.logger().debug("PRUTH_BUILD_INTERFACE: " + node + ", " + net);
 		InterfaceNode2Net i = new InterfaceNode2Net(node,net,this);
 		sliceGraph.addEdge(i, node, net);
 		return i;
 	}
-	
+
 	public ComputeNode addComputeNode(String name){
 		ComputeNode node = buildComputeNode(name);
 		node.setIsNew(true);
-		ndlModel.add(node,name);	
+		ndlModel.add(node,name);
 		return node;
 	}
 	public StorageNode addStorageNode(String name, long capacity, String mntPoint){
@@ -225,10 +225,13 @@ public class SliceGraph   {
 		ndlModel.add(link, name, bandwidth);
 		return link;
 	}
-	
+
 	public void addStitch(RequestResource a, RequestResource b, Interface s){
 		if(s instanceof InterfaceNode2Net){
 			ndlModel.add((InterfaceNode2Net)s);
+		}
+		if(s instanceof InterfaceStitchPort2StitchPort){
+			ndlModel.add((InterfaceStitchPort2StitchPort)s);
 		}
 		sliceGraph.addEdge(s, a, b);
 	}
@@ -239,7 +242,7 @@ public class SliceGraph   {
 		}
 		sliceGraph.addEdge(s, a, b);
 	}
-	
+
 	public RequestResource getResourceByName(String nm){
 		if (nm == null)
 			return null;
@@ -251,10 +254,10 @@ public class SliceGraph   {
 		}
 		return null;
 	}
-	
+
 	public RequestResource getResourceByURI(String uri){
 		LIBNDL.logger().debug("getResourceByURI: " + uri);
-		
+
 		if (uri == null)
 			return null;
 		LIBNDL.logger().debug("getResourceByURI: " + sliceGraph);
@@ -268,35 +271,35 @@ public class SliceGraph   {
         ndlModel.remove(node);
         deleteResource((RequestResource)node);
     }
-	
+
 	public void deleteResource(ComputeNode node){
-		ndlModel.remove(node);	
+		ndlModel.remove(node);
 		deleteResource((RequestResource)node);
 	}
-	
+
 	public void deleteResource(BroadcastNetwork bn){
 		for (Interface i: bn.getInterfaces()){
 			this.deleteResource(i);
 		}
 		ndlModel.remove(bn);
-		
+
 		sliceGraph.removeVertex(bn);
 		deleteResource((RequestResource)bn);
 	}
-	
+
 	public void deleteResource(RequestResource requestResource){
 		sliceGraph.removeVertex(requestResource);
 	}
-	
+
 	public void deleteResource(Interface i){
         //TODO: Only handles InterfaceNode2Net for now
         ndlModel.remove((InterfaceNode2Net)i);
         sliceGraph.removeEdge(i);
 	}
-	
+
 	public Collection<Interface> getInterfaces(){
 		ArrayList<Interface> interfaces = new ArrayList<Interface>();
-		
+
 		for (Interface i: sliceGraph.getEdges()) {
 			if (i instanceof Interface){
 				interfaces.add((Interface)i);
@@ -304,54 +307,54 @@ public class SliceGraph   {
 		}
 		return interfaces;
 	}
-	
+
 	public Collection<Interface> getInterfaces(RequestResource r){
 		return sliceGraph.getIncidentEdges(r);
 	}
-	
+
 	public void clear(){
 		//reset the whole request
 	}
-	
+
 	public RequestReservationTerm getTerm() {
 		return term;
 	}
-	
+
 	public void setTerm(RequestReservationTerm t) {
 		term = t;
 	}
-	
+
 	public void setNsGuid(String g) {
 		nsGuid = g;
 	}
-	
+
 	public void setOfUserEmail(String ue) {
 		ofUserEmail = ue;
 	}
-	
+
 	public String getOfUserEmail() {
 		return ofUserEmail;
 	}
-	
+
 	public void setOfSlicePass(String up) {
 		ofSlicePass = up;
 	}
-	
+
 	public String getOfSlicePass() {
 		return ofSlicePass;
 	}
-	
+
 	public void setOfCtrlUrl(String cu) {
 		ofCtrlUrl = cu;
 	}
-	
+
 	public String getOfCtrlUrl() {
 		return ofCtrlUrl;
 	}
-	
+
 	public Collection<Network> getLinks(){
 		ArrayList<Network> links = new ArrayList<Network>();
-		
+
 		for (ModelResource resource: sliceGraph.getVertices()) {
 			if(resource instanceof Network){
 				links.add((Network)resource);
@@ -359,10 +362,10 @@ public class SliceGraph   {
 		}
 		return links;
 	}
-	
+
 	public Collection<BroadcastNetwork> getBroadcastLinks(){
 		ArrayList<BroadcastNetwork> broadcastlinks = new ArrayList<BroadcastNetwork>();
-		
+
 		for (ModelResource resource: sliceGraph.getVertices()) {
 			if(resource instanceof BroadcastNetwork){
 				broadcastlinks.add((BroadcastNetwork)resource);
@@ -370,10 +373,10 @@ public class SliceGraph   {
 		}
 		return broadcastlinks;
 	}
-	
+
 	public Collection<Node> getNodes(){
 		ArrayList<Node> nodes = new ArrayList<Node>();
-		
+
 		for (ModelResource resource: sliceGraph.getVertices()) {
 			if(resource instanceof Node){
 				nodes.add((Node)resource);
@@ -381,10 +384,10 @@ public class SliceGraph   {
 		}
 		return nodes;
 	}
-	
+
 	public Collection<ComputeNode> getComputeNodes(){
 		ArrayList<ComputeNode> nodes = new ArrayList<ComputeNode>();
-		
+
 		for (ModelResource resource: sliceGraph.getVertices()) {
 			if(resource instanceof ComputeNode){
 				nodes.add((ComputeNode)resource);
@@ -392,27 +395,27 @@ public class SliceGraph   {
 		}
 		return nodes;
 	}
-	
+
 	public Collection<StorageNode> getStorageNodes(){
 		ArrayList<StorageNode> nodes = new ArrayList<StorageNode>();
-		
+
 		for (ModelResource resource: sliceGraph.getVertices()) {
 			if(resource instanceof StorageNode){
 				nodes.add((StorageNode)resource);
 			}
 		}
 		return nodes;
-	}	
+	}
 	public Collection<StitchPort> getStitchPorts(){
 		ArrayList<StitchPort> nodes = new ArrayList<StitchPort>();
-		
+
 		for (ModelResource resource: sliceGraph.getVertices()) {
 			if(resource instanceof StitchPort){
 				nodes.add((StitchPort)resource);
 			}
 		}
 		return nodes;
-	}	
+	}
 
 	public IP4Subnet setSubnet(String ip, int maskLength){
 		IP4Subnet subnet = null;
@@ -424,7 +427,7 @@ public class SliceGraph   {
 		}
 		return subnet;
 	}
-	
+
 	public IP4Subnet allocateSubnet(int count){
 		IP4Subnet subnet = null;
 		try{
@@ -435,43 +438,43 @@ public class SliceGraph   {
 		}
 		return subnet;
 	}
-	
+
 	public void autoIP(){
 		LIBNDL.logger().debug("autoIP unimplemented");
 	}
-	
+
 	public void loadNewRequest(){
 		rawLoadedRDF = "New Request";
 		NewSliceModel model = new NewSliceModel();
 		model.init(this);
 		this.ndlModel = model;
 	}
-	
+
 	public void loadRequestRDF(String rdf){
 		rawLoadedRDF = rdf;
 		this.ndlModel = new NewSliceModel();
 		this.ndlModel.init(this,rdf);
 	}
-	
+
 	public void loadManifestRDF(String rdf){
 		LIBNDL.logger().debug("SliceGraph::loadManifestRDF");
 		rawLoadedRDF = rdf;
 		this.ndlModel = new ExistingSliceModel();
 		((ExistingSliceModel)this.ndlModel).init(this,rdf);
-		
+
 		LIBNDL.logger().debug("SliceGraph::loadManifestRDF this.ndlModel = " + this.ndlModel);
 	}
-	
+
 	public void save(String file){
 		saveNewRequest(file);
 	}
-	
+
 	public void saveNewRequest(String file){
 	}
-	
+
 	public void saveModifyRequest(String file){
 	}
-	
+
 	public String getRDFString(){
 		return ndlModel.getRequest();
 	}
@@ -479,7 +482,7 @@ public class SliceGraph   {
 	public boolean autoAssignIPAddresses() {
 		return true;
 	}
-	
+
 	public String getDebugString(){
 		String rtnStr = "getRequestDebugString: ";
 		for (ModelResource r : sliceGraph.getVertices()){
@@ -487,7 +490,7 @@ public class SliceGraph   {
 		}
 		return rtnStr;
 	}
-	
+
 	public String getSliceGraphString(){
 		return sliceGraph.toString();
 	}
@@ -508,7 +511,7 @@ public class SliceGraph   {
 
 	public void addCrossConnect(String string) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public Node addNode(String string) {
