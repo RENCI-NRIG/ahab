@@ -1,4 +1,4 @@
-# xoStitch is tool used to create stitchport-to-stitchport circuits across ExoGENI including special handling for facilities like Chameleon
+# xoStitch is a tool used to create stitchport-to-stitchport circuits across ExoGENI including special handling for facilities like Chameleon
 #  
 #
 
