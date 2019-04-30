@@ -82,6 +82,8 @@ public abstract class NDLGenerator {
 		dm.put("BBN-RADICS", "bbnradicsvmsite.rdf#bbnradicsvmsite");
 		dm.put("CIENA2 (Hanover, MD) XO Rack", "ciena2vmsite.rdf#ciena2vmsite");
 		dm.put(StitchPort.STITCHING_DOMAIN_SHORT_NAME, "orca.rdf#Stitching");
+		dm.put("INNOQ XO Rack", "innoqvmsite.rdf#innoqvmsite");
+		dm.put("ROCKY XO Rack", "rockyvmsite.rdf#rockyvmsite");
 
 		domainMap = Collections.unmodifiableMap(dm);
 	}

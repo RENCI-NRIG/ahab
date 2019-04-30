@@ -1080,6 +1080,9 @@ public class TestDriver {
             conn.stitch(storage);
             conn.stitch(n0, storage);
 
+            StitchPort stitchPort = s.addStitchPort("SP1", "3291", "http://geni-orca.renci.org/owl/ion.rdf#AL2S/Chameleon/Cisco/6509/GigabitEthernet/1/1",  10000000L);
+            n0.stitch(stitchPort);
+
             System.out.println("testCreateSliceWithStorage:\n" + s.getRequest());
 
             s.commit();
@@ -1207,7 +1210,55 @@ public class TestDriver {
     }
 
 
+    public static void testCreateSliceWithStorageOnQueens(String pem){
+        try{
 
+            SliceAccessContext<SSHAccessToken> sctx = new SliceAccessContext<>();
+
+            SSHAccessTokenFileFactory fac = new SSHAccessTokenFileFactory("~/.ssh/id_rsa.pub", false);
+            SSHAccessToken t = fac.getPopulatedToken();
+
+            sctx.addToken("kthare10", "kthare10", t);
+
+            sctx.addToken("kthare10", t);
+
+            System.out.println(sctx);
+
+            ITransportProxyFactory ifac = new XMLRPCProxyFactory();
+            System.out.println("Opening certificate " + pem + " and key " + pem);
+            TransportContext ctx = new PEMTransportContext("", pem, pem);
+
+            ISliceTransportAPIv1 sliceProxy = ifac.getSliceProxy(ctx, new URL("https://rocky-hn.exogeni.net:11443/orca/xmlrpc"));
+
+            Slice s = Slice.create(sliceProxy, sctx, "kthare10-slice2");
+
+            ComputeNode   n0 = s.addComputeNode("Node0");
+            n0.setImage("http://geni-images.renci.org/images/standard/centos-comet/centos7.6-v1.8.1-comet/centos7.6-v1.8.1-comet.xml",
+                    "a828a37101c5c70571e2898e347e0a4d00ab3477","centos7.6-v1.8.1-comet");
+            n0.setNodeType("XO Medium");
+            n0.setDomain("ROCKY XO Rack");
+
+            String storageName = "Storage0";
+            StorageNode storage = s.addStorageNode(storageName, 1, null);
+            storage.setDomain(n0.getDomain());
+            System.out.println("after Adding storage=" + storage.toString());
+
+            LinkNetwork conn = s.addLinkNetwork("C2S0");
+            conn.stitch(storage);
+            conn.stitch(n0, storage);
+
+            System.out.println("testCreateSliceWithStorage:\n" + s.getRequest());
+
+            s.commit();
+
+            System.out.println("successfully created slice");
+        } catch (Exception e){
+            e.printStackTrace();
+            System.err.println("Proxy factory test failed");
+            assert(false);
+        }
+
+    }
     public static void main(String [] args){
 
     LIBNDL.setLogger();
@@ -1223,7 +1274,8 @@ public class TestDriver {
     //TestDriver.testSliceStatusWithStorage(args[0],"kthare10.slice1");
     //TestDriver.testDelete(args[0],"kthare10.slice1");
     //TestDriver.testNewSlice1(args[0]);
-    TestDriver.testGetSliceState(args[0],"Mobius-Exogeni-kthare10-7fa8e8a8-99c8-4b1b-a96e-aca4b61c8873");
+    //TestDriver.testGetSliceState(args[0],"Mobius-Exogeni-kthare10-7fa8e8a8-99c8-4b1b-a96e-aca4b61c8873");
+    TestDriver.testCreateSliceWithStorageOnQueens(args[0]);
     System.out.println("ndllib TestDriver: END");
     }
 }
