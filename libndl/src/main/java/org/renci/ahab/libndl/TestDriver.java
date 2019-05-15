@@ -1038,7 +1038,7 @@ public class TestDriver {
 
             SliceAccessContext<SSHAccessToken> sctx = new SliceAccessContext<>();
 
-            SSHAccessTokenFileFactory fac = new SSHAccessTokenFileFactory("~/.ssh/id_rsa.pub", false);
+            SSHAccessTokenFileFactory fac = new SSHAccessTokenFileFactory("~/.ssh/id_rsa.pub", true);
             SSHAccessToken t = fac.getPopulatedToken();
 
             sctx.addToken("kthare10", "kthare10", t);
@@ -1056,17 +1056,17 @@ public class TestDriver {
             Slice s = Slice.create(sliceProxy, sctx, "kthare10.slice1");
 
             ComputeNode   n0 = s.addComputeNode("Node0");
-            n0.setImage("http://geni-images.renci.org/images/standard/centos/centos6.3-v1.0.11.xml",
-                    "776f4874420266834c3e56c8092f5ca48a180eed","PRUTH-centos");
+            n0.setImage("http://geni-images.renci.org/images/standard/centos/centos7.4-v1.0.3.xml",
+                    "ebab47f2f1e9b7702d200cfa384ad86048bd29cd","centos7.4-v1.0.3");
             n0.setNodeType("XO Medium");
             n0.setDomain("RENCI (Chapel Hill, NC USA) XO Rack");
 
             ComputeNode   n1 = s.addComputeNode("Node1");
-            n1.setImage("http://geni-images.renci.org/images/standard/centos/centos6.3-v1.0.11.xml",
-                    "776f4874420266834c3e56c8092f5ca48a180eed","PRUTH-centos");
+            n1.setImage("http://geni-images.renci.org/images/standard/centos/centos7.4-v1.0.3.xml",
+                    "ebab47f2f1e9b7702d200cfa384ad86048bd29cd","centos7.4-v1.0.3");
             n1.setNodeType("XO Medium");
             n1.setDomain("RENCI (Chapel Hill, NC USA) XO Rack");
-
+/*
             BroadcastNetwork bn = s.addBroadcastLink("Network");
             bn.stitch(n0);
             bn.stitch(n1);
@@ -1082,7 +1082,7 @@ public class TestDriver {
 
             StitchPort stitchPort = s.addStitchPort("SP1", "3291", "http://geni-orca.renci.org/owl/ion.rdf#AL2S/Chameleon/Cisco/6509/GigabitEthernet/1/1",  10000000L);
             n0.stitch(stitchPort);
-
+*/
             System.out.println("testCreateSliceWithStorage:\n" + s.getRequest());
 
             s.commit();
@@ -1267,7 +1267,7 @@ public class TestDriver {
 
     //TestDriver.deleteAllSDXNetworks(args[0], "pruth.sdx.1");
     //TestDriver.setupSDXLinearNetwork(args[0],"pruth.sdx.1" );
-    //TestDriver.testCreateSliceWithStorage(args[0]);
+    TestDriver.testCreateSliceWithStorage(args[0]);
     //TestDriver.testGetSliceState(args[0],"kthare10.slice1");
     //TestDriver.testModifyWithStorage(args[0],"kthare10.slice1");
     //TestDriver.testModifyDeleteStorage(args[0],"kthare10.slice1");
@@ -1275,7 +1275,7 @@ public class TestDriver {
     //TestDriver.testDelete(args[0],"kthare10.slice1");
     //TestDriver.testNewSlice1(args[0]);
     //TestDriver.testGetSliceState(args[0],"Mobius-Exogeni-kthare10-7fa8e8a8-99c8-4b1b-a96e-aca4b61c8873");
-    TestDriver.testCreateSliceWithStorageOnQueens(args[0]);
+    //TestDriver.testCreateSliceWithStorageOnQueens(args[0]);
     System.out.println("ndllib TestDriver: END");
     }
 }

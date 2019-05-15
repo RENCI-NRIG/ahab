@@ -149,7 +149,8 @@ public abstract class NDLGenerator {
         ReservationStateClosed(5, "Closed"),
         ReservationStateCloseWait(6, "CloseWait"),
         ReservationStateFailed(7, "Failed"),
-        ReservationPendingStateClosing(8,"Closing");
+        ReservationPendingStateClosing(8,"Closing"),
+		ReservationStateBuilding(9,"Building"),;
 
 
         ReservationState(int value, String name) {
@@ -173,6 +174,7 @@ public abstract class NDLGenerator {
         rs.put(ReservationState.ReservationStateCloseWait.name, ReservationState.ReservationStateCloseWait.value);
         rs.put(ReservationState.ReservationStateFailed.name, ReservationState.ReservationStateFailed.value);
         rs.put(ReservationState.ReservationPendingStateClosing.name, ReservationState.ReservationPendingStateClosing.value);
+        rs.put(ReservationState.ReservationStateBuilding.name, ReservationState.ReservationStateBuilding.value);
         reservationStates = rs;
     }
 

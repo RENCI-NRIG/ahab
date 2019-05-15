@@ -34,12 +34,17 @@ public class XMLRPCAPIAdapter implements ISliceAccessAPIAdapter<SSHAccessToken> 
 				sshKeys.addAll(t.getKeys());
 				sudoFinal = sudoFinal || t.getSudo();
 			}
-			Map<String, Object> userEntry = new HashMap<>();
+			Map<String, Object> userEntry = new HashMap<String, Object>();
 			userEntry.put(LOGIN_FIELD, id);
 			userEntry.put(KEYS_FIELD, sshKeys);
-			userEntry.put(SUDO_FIELD, sudoFinal);
+			if(sudoFinal) {
+                userEntry.put(SUDO_FIELD, "yes");
+            }
+            else {
+                userEntry.put(SUDO_FIELD, "no");
+            }
 			ret.add(userEntry);
-		}
+        }
 		return ret;
 	}
 

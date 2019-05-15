@@ -440,8 +440,12 @@ public class Slice {
 
         for (ModelResource r : getAllResources()) {
             RequestResource requestResource = (RequestResource) r;
-            System.out.println("Resource=" + requestResource.getName() + " State=" + requestResource.getState());
-            b.add(NDLGenerator.reservationStates.get(requestResource.getState()));
+            if(requestResource != null) {
+				System.out.println("Resource=" + requestResource.getName() + " State=" + requestResource.getState());
+				if(requestResource.getState() != null) {
+                    b.add(NDLGenerator.reservationStates.get(requestResource.getState()));
+                }
+			}
         }
 
         // has only Active, ActiveTicketed, Closed or Ticketed reservations
