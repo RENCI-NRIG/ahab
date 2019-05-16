@@ -1,6 +1,6 @@
-# xoStitch is a tool used to create stitchport-to-stitchport circuits across ExoGENI including special handling for facilities like Chameleon
-#  
-#
+# xoStitch 
+It is a tool used to create stitchport-to-stitchport circuits across ExoGENI including special handling for facilities like Chameleon
+
 
 ### GENI Cert info
 1. You will need a [GENI cert](http://www.exogeni.net/2015/09/exogeni-getting-started-tutorial/) to create slices on ExoGENI.
@@ -13,6 +13,9 @@
 
 ### Build
 1. mvn clean package appassembler:assemble
+2. To build debian package; run the below command as well
+./buildXoStitchDeb.sh
+NOTE: This command will create a xoStitch.deb pacakage in target directory.
 
 ### Chameleon Example
 1. ./target/appassembler/bin/xoStitch create  -chameleon -uc 3297 -tacc 3506 -c ~/.ssl/geni-pruth.pem
