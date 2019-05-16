@@ -1,6 +1,6 @@
-# xoStitch is a tool used to create stitchport-to-stitchport circuits across ExoGENI including special handling for facilities like Chameleon
-#  
-#
+# xoStitch 
+It is a tool used to create stitchport-to-stitchport circuits across ExoGENI including special handling for facilities like Chameleon
+
 
 ### GENI Cert info
 1. You will need a [GENI cert](http://www.exogeni.net/2015/09/exogeni-getting-started-tutorial/) to create slices on ExoGENI.
