@@ -13,6 +13,9 @@
 
 ### Build
 1. mvn clean package appassembler:assemble
+2. To build debian package; run the below command as well
+./buildXoStitchDeb.sh
+NOTE: This command will create a xoStitch.deb pacakage in target directory.
 
 ### Chameleon Example
 1. ./target/appassembler/bin/xoStitch create  -chameleon -uc 3297 -tacc 3506 -c ~/.ssl/geni-pruth.pem
