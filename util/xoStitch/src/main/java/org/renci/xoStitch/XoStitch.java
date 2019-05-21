@@ -16,6 +16,7 @@ import org.renci.ahab.libtransport.util.SSHAccessTokenFileFactory;
 import org.renci.ahab.libtransport.xmlrpc.XMLRPCProxyFactory;
 
 import java.net.URL;
+import java.util.HashMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -24,7 +25,6 @@ import org.apache.commons.cli.Option.Builder;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
-
 /**
  * `mvn clean package`
  * `java -cp ./target/stitch-1.0-SNAPSHOT-jar-with-dependencies.jar org.renci.chameleon.jupyter.stitch.App certLocation keyLocation controllerURL sliceName`
@@ -32,16 +32,22 @@ import org.apache.commons.cli.ParseException;
  */
 public class XoStitch
 {
+  static final String DEFAULT_CONTROLLER_URL = "https://geni.renci.org:11443/orca/xmlrpc"; //exosm
+  static HashMap<String, String> KNOWN_STITCHPORTS;
 
-  enum StitchType
-  {
-    GENERIC_STITCH, CHAMELEON_STITCH;
-  }
-  static StitchType type = StitchType.GENERIC_STITCH;
+
+
+//  enum StitchType
+//  {
+//    GENERIC_STITCH, CHAMELEON_STITCH;
+//  }
+
+//  static StitchType type = StitchType.GENERIC_STITCH;
 
   static String certLocation = null;
   static String keyLocation = null;
-  static String controllerUrl = "https://geni.renci.org:11443/orca/xmlrpc";
+  static String controllerUrl = DEFAULT_CONTROLLER_URL;
+  static String passphrase = null;
 
   static String command = null;
   static String sliceName = null;
@@ -51,12 +57,21 @@ public class XoStitch
   static String sp1_label = null;
   static String sp2_label = null;
 
+
+
   static ISliceTransportAPIv1 sliceProxy;
   static SliceAccessContext<SSHAccessToken> sctx;
 
     public static void main( String[] args ) throws Exception
     {
+      KNOWN_STITCHPORTS = new HashMap<String, String>();
+      KNOWN_STITCHPORTS.put("uc", "http://geni-orca.renci.org/owl/ion.rdf#AL2S/Chameleon/Cisco/6509/GigabitEthernet/1/1");
+      KNOWN_STITCHPORTS.put("tacc", "http://geni-orca.renci.org/owl/ion.rdf#AL2S/TACC/Cisco/6509/TenGigabitEthernet/1/1");
+
         System.out.println( "Creating a simple Slice!" );
+
+
+
 
         // command line ideas:
         // Chameleon:   ./stitch create -chameleon -tacc 3501 -uc 2391 -cert /path/to/geni/cert
@@ -64,115 +79,161 @@ public class XoStitch
 
         CommandLine commandLine;
         //chameleon options
-        Option option_chameleon = Option.builder("chameleon").required(false).argName("chameleon").desc("chameleon").build();
-        Option option_chameleon_uc = Option.builder("uc").required(false).argName("uc").hasArg().desc("uc").build();
-        Option option_chameleon_tacc = Option.builder("tacc").required(false).argName("tacc").hasArg().desc("tacc").build();
+        //Option option_chameleon = Option.builder("chameleon").required(false).argName("chameleon").desc("chameleon").build();
+        //Option option_chameleon_uc = Option.builder("uc").required(false).argName("uc").hasArg().desc("uc").build();
+        //Option option_chameleon_tacc = Option.builder("tacc").required(false).argName("tacc").hasArg().desc("tacc").build();
 
         //non-Chameleon options
-        Option option_sp1 = Option.builder("sp1").required(false).argName("stitchport1").hasArg().desc("stitchport1").build();
-        Option option_sp2 = Option.builder("sp2").required(false).argName("stitchport2").hasArg().desc("stitchport2").build();
-        Option option_sp1_label = Option.builder("l1").required(false).argName("label1").hasArg().desc("label1").build();
-        Option option_sp2_label = Option.builder("l2").required(false).argName("label2").hasArg().desc("label2").build();
+        //Option option_sp1 = Option.builder("sp1").required(false).argName("stitchport1").hasArg().desc("stitchport1").build();
+        //Option option_sp2 = Option.builder("sp2").required(false).argName("stitchport2").hasArg().desc("stitchport2").build();
+        Option option_url1 = Option.builder("url1").required(true).argName("url1").hasArg().desc("url1").build();
+        Option option_url2 = Option.builder("url2").required(true).argName("url2").hasArg().desc("url2").build();
+        Option option_vlan1 = Option.builder("vlan1").required(true).argName("vlan1").hasArg().desc("vlan1").build();
+        Option option_vlan2 = Option.builder("vlan2").required(true).argName("vlan2").hasArg().desc("vlan2").build();
+        //Option option_sp1_label = Option.builder("l1").required(false).argName("label1").hasArg().desc("label1").build();
+        //Option option_sp2_label = Option.builder("l2").required(false).argName("label2").hasArg().desc("label2").build();
 
         //common options
-        Option option_certLocation = Option.builder("c").required(false).argName("certLocation").hasArg().desc("certLocation").build();
-        Option option_keyLocation = Option.builder("k").required(false).argName("keyLocation").hasArg().desc("keyLocation").build();
+        Option option_certLocation = Option.builder("c").required(true).argName("certLocation").hasArg().desc("certLocation").build();
+        //Option option_keyLocation = Option.builder("k").required(false).argName("keyLocation").hasArg().desc("keyLocation").build();
 
         Option option_controllerUrl= Option.builder("u").required(false).argName("controllerUrl").hasArg().desc("controllerUrl").build();
+
+        Option option_sliceNane= Option.builder("n").required(false).argName("sliceNane").hasArg().desc("sliceName").build();
+        Option option_passphrase= Option.builder("p").required(false).argName("passphrase").hasArg().desc("passphrase").build();
 
         Options options = new Options();
         CommandLineParser parser = new DefaultParser();
 
-        options.addOption(option_chameleon);
-        options.addOption(option_chameleon_uc);
-        options.addOption(option_chameleon_tacc);
+        //options.addOption(option_chameleon);
+        //options.addOption(option_chameleon_uc);
+        //options.addOption(option_chameleon_tacc);
 
-        options.addOption(option_sp1);
-        options.addOption(option_sp2);
-        options.addOption(option_sp1_label);
-        options.addOption(option_sp2_label);
+        //options.addOption(option_sp1);
+        //options.addOption(option_sp2);
+        //options.addOption(option_sp1_label);
+        ///options.addOption(option_sp2_label);
+        //options.addOption(option_endpoints);
+        options.addOption(option_url1);
+        options.addOption(option_url2);
+        options.addOption(option_vlan1);
+        options.addOption(option_vlan2);
+
+
         options.addOption(option_certLocation);
-        options.addOption(option_keyLocation);
+        //options.addOption(option_keyLocation);
         options.addOption(option_controllerUrl);
+        options.addOption(option_sliceNane);
+        options.addOption(option_passphrase);
 
         try
         {
           commandLine = parser.parse(options, args);
 
-          //if chameleon tacc2uc reqeust
-          if (commandLine.hasOption("chameleon")){
-              System.out.println("Preparing Chameleon TACC-to-UC Circuit");
-              type = StitchType.CHAMELEON_STITCH;
-
-              //use exosm
-              controllerUrl = "https://geni.renci.org:11443/orca/xmlrpc";
-
-              //uc stitchport
-              if (commandLine.hasOption("uc")){
-                  System.out.println("UC Label: " + commandLine.getOptionValue("uc"));
-                  sp1_url = "http://geni-orca.renci.org/owl/ion.rdf#AL2S/Chameleon/Cisco/6509/GigabitEthernet/1/1";
-                  sp1_label = commandLine.getOptionValue("uc");
-              }
-
-              //tacc stitchport
-              if (commandLine.hasOption("tacc")){
-                  System.out.println("TACC Label: " + commandLine.getOptionValue("tacc"));
-                  sp2_url = "http://geni-orca.renci.org/owl/ion.rdf#AL2S/TACC/Cisco/6509/TenGigabitEthernet/1/1";
-                  sp2_label = commandLine.getOptionValue("tacc");
-              }
-
-              //geni cert
-              if (commandLine.hasOption("c")){
-                  certLocation = commandLine.getOptionValue("c");
-                  keyLocation = certLocation;
-              }
-
-              sliceName = "chameleon-tacc"+sp2_label+"-uc"+sp1_label;
+          //Set controller url
+          if (commandLine.hasOption("u")){
+            controllerUrl = commandLine.getOptionValue("u");
           } else {
-            //Non-Chameleon
+            controllerUrl = DEFAULT_CONTROLLER_URL;
+          }
+          System.out.println("controller url: " + controllerUrl);
 
-          if (commandLine.hasOption("sp1"))
-          {
-            //System.out.print("Option sp1 is present.  The value is: ");
-            //System.out.println(commandLine.getOptionValue("sp1"));
-            sp1_url = commandLine.getOptionValue("sp1");
-          }
-          if (commandLine.hasOption("sp2"))
-          {
-            sp2_url = commandLine.getOptionValue("sp2");
-          }
-          if (commandLine.hasOption("l1"))
-          {
-            sp1_label = commandLine.getOptionValue("l1");
-          }
-          if (commandLine.hasOption("l2"))
-          {
-            sp2_label = commandLine.getOptionValue("l2");
+          //Set certificate location
+          if (commandLine.hasOption("c")){
+              certLocation = commandLine.getOptionValue("c");
+              keyLocation = certLocation;
+          } else {
+              System.out.println("GENI certificate required (-c <certificate_file>)");
+              System.exit(1);
           }
 
-        }
+          //Set cert passphrase
+          if (commandLine.hasOption("p")){
+              passphrase = commandLine.getOptionValue("p");
+          } else {
+              passphrase = "";
+          }
+
+          //optionally set slice name
+          if (commandLine.hasOption("n")){
+              sliceName = commandLine.getOptionValue("n");
+          }
+
+          //Set endpoint1
+          String url1_str = "";
+          if (commandLine.hasOption("url1"))
           {
-            String[] remainder = commandLine.getArgs();
-            System.out.print("Remaining arguments: ");
-            for (String argument : remainder)
-            {
-              System.out.print(argument);
-              System.out.print(" ");
-            }
-            if (type == StitchType.GENERIC_STITCH){
-              if (remainder.length >= 2){
-                command = remainder[0];
-                sliceName = remainder[1];
-              }
-            } else if (type == StitchType.CHAMELEON_STITCH){
-              if (remainder.length >= 1){
-                command = remainder[0];
-              }
+            url1_str = commandLine.getOptionValue("url1");
+            System.out.println("url1_str = " + url1_str);
+            if (KNOWN_STITCHPORTS.containsKey(url1_str)) {
+              sp1_url = KNOWN_STITCHPORTS.get(url1_str);
             } else {
-              System.out.print("Invalid stitch type or missing arguments");
+              sp1_url = url1_str;
             }
+          }
+          if (commandLine.hasOption("vlan1"))
+          {
+            sp1_label = commandLine.getOptionValue("vlan1");
+          }
 
-            System.out.println();
+          System.out.println("sp1_url = " + sp1_url);
+          System.out.println("sp1_label = " + sp1_label);
+
+          //Set endpoint2
+          String url2_str = "";
+          if (commandLine.hasOption("url2"))
+          {
+            url2_str = commandLine.getOptionValue("url2");
+            System.out.println("url2_str = " + url2_str);
+            if (KNOWN_STITCHPORTS.containsKey(url2_str)) {
+              sp2_url = KNOWN_STITCHPORTS.get(url2_str);
+            } else {
+              sp2_url = url2_str;
+            }
+          }
+          if (commandLine.hasOption("vlan2"))
+          {
+            sp2_label = commandLine.getOptionValue("vlan2");
+          }
+
+          System.out.println("sp2_url = " + sp2_url);
+          System.out.println("sp2_label = " + sp2_label);
+
+          //replace short stitchport names and build slice name
+          if(sliceName == null){
+            sliceName = "";
+            if (KNOWN_STITCHPORTS.containsKey(url1_str)) {
+              sliceName += url1_str + "_"+ sp1_label;
+            } else {
+              sliceName += "customUrl_"+ sp1_label;
+            }
+            if (KNOWN_STITCHPORTS.containsKey(url2_str)) {
+              sliceName += "-" + url2_str + "_"+ sp2_label;
+            } else {
+              sliceName += "-customUrl_"+ sp2_label;
+            }
+          }
+
+          System.out.println("Revised Endpoints:");
+          System.out.println("sliceName: " + sliceName);
+          System.out.println("sp1_url: " + sp1_url);
+          System.out.println("sp1_label: " + sp1_label);
+          System.out.println("sp2_url: " + sp2_url);
+          System.out.println("sp2_label: " + sp2_label);
+
+
+          String[] remainder = commandLine.getArgs();
+          System.out.print("Remaining arguments: ");
+          for (String argument : remainder)
+          {
+            System.out.print(argument);
+            System.out.print(" ");
+          }
+
+          if (remainder.length >= 1){
+            command = remainder[0];
+          } else {
+            System.out.print("Invalid stitch type or missing arguments");
           }
 
         }
@@ -205,8 +266,8 @@ public class XoStitch
       //ExoGENI controller context
       ITransportProxyFactory ifac = new XMLRPCProxyFactory();
       System.out.println("Opening certificate " + certLocation + " and key " + keyLocation);
-      char [] pwd = System.console().readPassword("Enter password for key: ");
-      TransportContext ctx = new PEMTransportContext(String.valueOf(pwd), certLocation, keyLocation);
+      //passphrase = String.valueOf(System.console().readPassword("Enter password for key: "));
+      TransportContext ctx = new PEMTransportContext(passphrase, certLocation, keyLocation);
       sliceProxy = ifac.getSliceProxy(ctx, new URL(controllerUrl));
 
       /*
