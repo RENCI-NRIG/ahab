@@ -42,6 +42,7 @@
                 <artifactId>appassembler-maven-plugin</artifactId>
                 <version>1.10</version>
                 <configuration>
+                  <repositoryName>lib/xoStitch</repositoryName>
                   <programs>
                     <program>
                       <mainClass>org.renci.xostitch.XoStitch</mainClass>

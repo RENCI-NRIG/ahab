@@ -97,7 +97,6 @@ public class StitchPort extends Network {
 			stitch = new InterfaceNode2Net((Node)r,this,sliceGraph);
 		} else if (r instanceof StitchPort) {
 			//Special case for stitchport-to-stitchport
-			System.out.println("Stitching stitchport to stitchport " );
 			stitch = new InterfaceStitchPort2StitchPort((StitchPort)r,this,sliceGraph);
 		} else {
 			//Can't stitch computenode to r
