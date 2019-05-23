@@ -276,6 +276,8 @@ public class NewSliceModel extends NDLModel {
 
 			ngen.addInterfaceToIndividual(intI, nodeI);
 			ngen.addResourceToReservation(reservation, nodeI);
+            ngen.addDependOnToIndividual(ngen.getRequestIndividual(depend.getName()), nodeI);
+
 			this.mapRequestResource2ModelResource(i, intI);
 		} catch (NdlException e){
 			logger().error("ERROR: NewSliceModel::add(InterfaceNode2Net) " );
