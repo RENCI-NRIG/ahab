@@ -130,7 +130,6 @@ public class XoStitch
     domains.put("wsu","WSU (Detroit, MI, USA) XO Rack");
     domains.put("psc","PSC (Pittsburgh, TX, USA) XO Rack");
     domains.put("unf","UNF (Jacksonville, FL) XO Rack");
-    domains.put("gwu","GWU (Washington DC,  USA) XO Rack");
     domains.put("ciena","CIENA (Ottawa,  CA) XO Rack");
     domains.put("ciena2","CIENA2 (Hanover, MD) XO Rack");
 
@@ -212,7 +211,6 @@ public class XoStitch
 
 
       String url1_str = commandLine.getOptionValue("sp1");
-      System.out.println("sp1_str = " + url1_str);
       if (KNOWN_STITCHPORTS.containsKey(url1_str)) {
         sp1_url = KNOWN_STITCHPORTS.get(url1_str);
       } else {
@@ -221,7 +219,6 @@ public class XoStitch
       sp1_label = commandLine.getOptionValue("vlan1");
 
       String url2_str = commandLine.getOptionValue("sp2");
-      System.out.println("sp2_str = " + url2_str);
       if (KNOWN_STITCHPORTS.containsKey(url2_str)) {
         sp2_url = KNOWN_STITCHPORTS.get(url2_str);
       } else {
@@ -246,22 +243,7 @@ public class XoStitch
         }
       }
 
-      System.out.println("Endpoints:");
-      System.out.println("sliceName: " + sliceName);
-      System.out.println("sp1_url: " + sp1_url);
-      System.out.println("sp1_label: " + sp1_label);
-      System.out.println("sp2_url: " + sp2_url);
-      System.out.println("sp2_label: " + sp2_label);
-
-
       String[] remainder = commandLine.getArgs();
-      System.out.print("Remaining arguments: ");
-      for (String argument : remainder)
-      {
-        System.out.print(argument);
-        System.out.print(" ");
-      }
-
       if (remainder.length >= 1){
         command = remainder[0];
       } else {
@@ -271,13 +253,17 @@ public class XoStitch
     }
     catch (ParseException exception)
     {
-      System.out.print("Parse error: ");
-      System.out.println(exception.getMessage());
+      //System.out.print("Parse error: ");
+      //System.out.println(exception.getMessage());
 
       HelpFormatter formatter = new HelpFormatter();
       formatter.setWidth(150);
-      formatter.printHelp("xoStitch", options );
-
+      formatter.printHelp("xoStitch [create|delete|status] -sp1 <stitchport> -vlan1 <vlan> -sp2 <stitchport> -vlan2 <vlan> -c <geni.pem> <options>", options );
+      System.out.println("\n\n Examples: ");
+      System.out.println("xoStitch create -sp1 uc -vlan1 3290 -sp2 tacc -vlan2 3500 -c geni.pem");
+      System.out.println("xoStitch status -sp1 uc -vlan1 3290 -sp2 tacc -vlan2 3500 -c geni.pem");
+      System.out.println("xoStitch delete -sp1 uc -vlan1 3290 -sp2 tacc -vlan2 3500 -c geni.pem");
+      System.out.println("xoStitch create -sp1 http://geni-orca.renci.org/owl/ion.rdf#AL2S/Chameleon/Cisco/6509/GigabitEthernet/1/1 -vlan1 3290 -sp2 http://geni-orca.renci.org/owl/ion.rdf#AL2S/TACC/Cisco/6509/TenGigabitEthernet/1/1 -vlan2 3500 -c geni.pem");
       System.exit(1);
     }
 

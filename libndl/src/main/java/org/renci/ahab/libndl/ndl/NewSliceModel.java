@@ -108,7 +108,6 @@ public class NewSliceModel extends NDLModel {
 	@Override
 	public void add(StitchPort sp, String name, String label, String port) {
 		logger().debug("add(StitchPort sp) sp: " + sp);
-		System.out.println("add(StitchPort): " + name);
     Individual spi = null;
     try{
     		//Add the stitchport
@@ -126,7 +125,6 @@ public class NewSliceModel extends NDLModel {
 	@Override
   public void add(InterfaceStitchPort2StitchPort i){
 		logger().debug("add(InterfaceStitchPort2StitchPort) i: " + i);
-		System.out.println("add(InterfaceStitchPort2StitchPort) i: " + i);
 		try{
 
 		StitchPort sp1=i.getSp1();
