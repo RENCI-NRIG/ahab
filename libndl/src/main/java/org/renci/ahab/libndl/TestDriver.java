@@ -1243,14 +1243,14 @@ public class TestDriver {
             //        "c21cce26d89e336695c64f94c3ccfebac88e856c","centos6.10-comet");
 
 
-            //n0.setImage("http://geni-images.renci.org/images/standard/debian-comet/debian-9.9.0-comet/debian-9.9.0-comet.xml",
-            //        "932d7a6ca3c6e37fdc334c8330d2e8380e67f0d4","debian-9.9.0-comet");
+            n0.setImage("http://geni-images.renci.org/images/standard/debian-comet/debian-9.9.0-comet/debian-9.9.0-comet.xml",
+                    "7a7679c0d4963823d38ee92f90d95977081a1948","debian-9.9.0-comet");
 
             //n0.setImage("http://geni-images.renci.org/images/standard/fedora-comet/fedora30-v1.2-comet/fedora30-v1.2-comet.xml",
             //        "8ed6c2d1e69b30f42b2deb02eb6b7404679c212d","fedora30-v1.2-comet");
 
-            n0.setImage("http://geni-images.renci.org/images/standard/ubuntu-comet/ubuntu-16.04-comet/ubuntu-16.04-comet.xml",
-                    "cd51e0f0399b54b3c6b48917ec819ffe75d8c200","ubuntu-16.04-comet");
+            //n0.setImage("http://geni-images.renci.org/images/standard/ubuntu-comet/ubuntu-16.04-comet/ubuntu-16.04-comet.xml",
+            //        "cd51e0f0399b54b3c6b48917ec819ffe75d8c200","ubuntu-16.04-comet");
 
 
             n0.setNodeType("XO Medium");
