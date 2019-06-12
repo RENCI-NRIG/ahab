@@ -82,6 +82,8 @@ public abstract class NDLGenerator {
 		dm.put("BBN-RADICS", "bbnradicsvmsite.rdf#bbnradicsvmsite");
 		dm.put("CIENA2 (Hanover, MD) XO Rack", "ciena2vmsite.rdf#ciena2vmsite");
 		dm.put(StitchPort.STITCHING_DOMAIN_SHORT_NAME, "orca.rdf#Stitching");
+		dm.put("INNOQ XO Rack", "innoqvmsite.rdf#innoqvmsite");
+		dm.put("ROCKY XO Rack", "rockyvmsite.rdf#rockyvmsite");
 
 		domainMap = Collections.unmodifiableMap(dm);
 	}
@@ -147,7 +149,8 @@ public abstract class NDLGenerator {
         ReservationStateClosed(5, "Closed"),
         ReservationStateCloseWait(6, "CloseWait"),
         ReservationStateFailed(7, "Failed"),
-        ReservationPendingStateClosing(8,"Closing");
+        ReservationPendingStateClosing(8,"Closing"),
+		ReservationStateBuilding(9,"Building"),;
 
 
         ReservationState(int value, String name) {
@@ -171,6 +174,7 @@ public abstract class NDLGenerator {
         rs.put(ReservationState.ReservationStateCloseWait.name, ReservationState.ReservationStateCloseWait.value);
         rs.put(ReservationState.ReservationStateFailed.name, ReservationState.ReservationStateFailed.value);
         rs.put(ReservationState.ReservationPendingStateClosing.name, ReservationState.ReservationPendingStateClosing.value);
+        rs.put(ReservationState.ReservationStateBuilding.name, ReservationState.ReservationStateBuilding.value);
         reservationStates = rs;
     }
 
