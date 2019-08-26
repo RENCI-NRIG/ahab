@@ -107,7 +107,7 @@
 			<dependency>
 				<groupId>orca</groupId>
 				<artifactId>ndl</artifactId>
-				<version>5.4.12-SNAPSHOT</version>
+				<version>5.4.13-SNAPSHOT</version>
 				<type>jar</type>
 			</dependency>
 			<dependency>
@@ -195,7 +195,7 @@
 			<dependency>
 				<groupId>orca.core</groupId>
 				<artifactId>util</artifactId>
-				<version>5.4.12-SNAPSHOT</version>
+				<version>5.4.13-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.renci.ahab</groupId>
