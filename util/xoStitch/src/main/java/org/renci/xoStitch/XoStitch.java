@@ -232,14 +232,14 @@ public class XoStitch
       } else {
         sliceName = "";
         if (KNOWN_STITCHPORTS.containsKey(url1_str)) {
-          sliceName += url1_str + "_"+ sp1_label;
+          sliceName += url1_str + "-"+ sp1_label;
         } else {
-          sliceName += "customUrl_"+ sp1_label;
+          sliceName += "customUrl-"+ sp1_label;
         }
         if (KNOWN_STITCHPORTS.containsKey(url2_str)) {
-          sliceName += "-" + url2_str + "_"+ sp2_label;
+          sliceName += "-" + url2_str + "-"+ sp2_label;
         } else {
-          sliceName += "-customUrl_"+ sp2_label;
+          sliceName += "-customUrl-"+ sp2_label;
         }
       }
 
