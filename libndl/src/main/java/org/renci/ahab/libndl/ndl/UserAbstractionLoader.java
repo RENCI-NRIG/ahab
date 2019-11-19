@@ -31,14 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import org.renci.ahab.libndl.LIBNDL;
 import org.renci.ahab.libndl.SliceGraph;
 import org.renci.ahab.libndl.resources.common.ModelResource;
-import org.renci.ahab.libndl.resources.request.ComputeNode;
-import org.renci.ahab.libndl.resources.request.InterfaceNode2Net;
-import org.renci.ahab.libndl.resources.request.Network;
-import org.renci.ahab.libndl.resources.request.Node;
-import org.renci.ahab.libndl.resources.request.RequestReservationTerm;
-import org.renci.ahab.libndl.resources.request.RequestResource;
-import org.renci.ahab.libndl.resources.request.StitchPort;
-import org.renci.ahab.libndl.resources.request.StorageNode;
+import org.renci.ahab.libndl.resources.request.*;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -526,5 +519,40 @@ public class UserAbstractionLoader extends NDLLoader  implements INdlManifestMod
 	public void ndlNetworkConnectionPath(Resource c, OntModel m, List<List<Resource>> path, List<Resource> roots) {
 		// TODO Auto-generated method stub
 
+        LIBNDL.logger().debug("Network Connection Path: " + c);
+        StitchPort stitchPort = null;
+		if (roots != null) {
+            LIBNDL.logger().debug("Printing roots");
+			for (Resource rr : roots) {
+                LIBNDL.logger().debug(rr);
+			}
+		}
+        ArrayList<Resource> pathResources = new ArrayList<>();
+		if (path != null) {
+            LIBNDL.logger().debug("Printing paths");
+			for (List<Resource> p : path) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("   Path: ");
+				for (Resource r : p) {
+					sb.append(r + " ");
+					if(stitchPort == null && NdlCommons.isStitchingNode(r)) {
+                        stitchPort = (StitchPort) sliceGraph.getResourceByName(r.getLocalName());
+                    }
+                    else {
+					    if(r.getLocalName().contains("vlan")) {
+                            pathResources.add(r);
+                        }
+                    }
+				}
+                LIBNDL.logger().debug(sb.toString());
+			}
+		} else
+            LIBNDL.logger().debug("   None");
+
+		if(stitchPort != null && pathResources.size() > 0) {
+            for (Resource r: pathResources) {
+                stitchPort.addPathResource(r);
+            }
+        }
 	}
 }

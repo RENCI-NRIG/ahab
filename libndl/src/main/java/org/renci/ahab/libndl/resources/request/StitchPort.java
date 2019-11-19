@@ -1,7 +1,11 @@
 package org.renci.ahab.libndl.resources.request;
 
+import com.hp.hpl.jena.rdf.model.Resource;
 import org.renci.ahab.libndl.Slice;
 import org.renci.ahab.libndl.SliceGraph;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /*
 * Copyright (c) 2013 RENCI/UNC Chapel Hill
@@ -30,7 +34,18 @@ public class StitchPort extends Network {
 	public static final String STITCHING_DOMAIN_SHORT_NAME = "Stitching domain";
 	protected String label;
 	protected String port;
+	ArrayList<Resource> pathResources;
 
+	public void addPathResource(com.hp.hpl.jena.rdf.model.Resource r){
+		if(pathResources == null) {
+            pathResources = new ArrayList<>();
+		}
+        pathResources.add(r);
+	}
+
+	public Collection<Resource> getPathResources(){
+		return pathResources;
+	}
 	public StitchPort(SliceGraph sliceGraph, String name, String label, String port, long bandwidth) {
 		super(sliceGraph, name);
 		this.label = label;

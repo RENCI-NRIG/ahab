@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
 
+import org.renci.ahab.libndl.resources.manifest.InterfaceNode2NetworkConnection;
 import org.renci.ahab.libndl.resources.request.*;
 import org.renci.ahab.libtransport.ISliceTransportAPIv1;
 import org.renci.ahab.libtransport.ITransportProxyFactory;
@@ -23,6 +24,7 @@ import org.renci.ahab.libtransport.util.SSHAccessTokenFileFactory;
 import org.renci.ahab.libtransport.xmlrpc.XMLRPCProxyFactory;
 import org.renci.ahab.libtransport.xmlrpc.XMLRPCTransportException;
 import org.renci.ahab.ndllib.transport.OrcaSMXMLRPCProxy;
+import sun.nio.ch.Net;
 
 /**computeElement to group: Workers, newNode: http://geni-orca.renci.org/owl/2ce709f3-bee2-46f0-97da-b6b944aed836#Workers/3
 
@@ -765,7 +767,7 @@ public class TestDriver {
     }
 
     public static void printRequest2Log(Slice s){
-        s.logger().debug("******************** START printReqest2Log *********************");
+        System.out.println("******************** START printReqest2Log *********************");
         for (Node node : s.getNodes()){
             String printStr = "PRUTH:" + node;
             if (node instanceof ComputeNode){
@@ -774,13 +776,13 @@ public class TestDriver {
                     printStr += ", manifestNode: " + mn.getURI();
                 }
             }
-            s.logger().debug(printStr);
+            System.out.println(printStr);
         }
 
         for (Network link : s.getLinks()){
-            s.logger().debug("PRUTH:" + link);
+            System.out.println("PRUTH:" + link);
         }
-        s.logger().debug("******************** END printReqest2Log *********************");
+        System.out.println("******************** END printReqest2Log *********************");
     }
 
     private static final String GLOBAL_PREF_FILE = "/etc/rm/rm.properties";
@@ -1211,7 +1213,7 @@ public class TestDriver {
     }
 
 
-    public static void testCreateSliceWithStorageOnQueens(String pem){
+    public static void testCreateSliceWithStitchPort(String pem){
         try{
 
             SliceAccessContext<SSHAccessToken> sctx = new SliceAccessContext<>();
@@ -1229,54 +1231,59 @@ public class TestDriver {
             System.out.println("Opening certificate " + pem + " and key " + pem);
             TransportContext ctx = new PEMTransportContext("", pem, pem);
 
-            ISliceTransportAPIv1 sliceProxy = ifac.getSliceProxy(ctx, new URL("https://rocky-hn.exogeni.net:11443/orca/xmlrpc"));
+            ISliceTransportAPIv1 sliceProxy = ifac.getSliceProxy(ctx, new URL("https://geni.renci.org:11443/orca/xmlrpc"));
 
             Slice s = Slice.create(sliceProxy, sctx, "kthare10-slice2");
 
             ComputeNode   n0 = s.addComputeNode("Node0");
-            n0.setPostBootScript("touch /root/psb_was_here");
-
-            //n0.setImage("http://geni-images.renci.org/images/standard/centos-comet/centos7.6.1810-comet/centos7.6.1810-comet.xml",
-            //        "9a0538dc8b8631c2f16727044a501bb835ba40e7","centos7.6.1810-comet");
-
-            //n0.setImage("http://geni-images.renci.org/images/standard/centos-comet/centos6.10-comet/centos6.10-comet.xml",
-            //        "c21cce26d89e336695c64f94c3ccfebac88e856c","centos6.10-comet");
-
-
-            n0.setImage("http://geni-images.renci.org/images/standard/debian-comet/debian-9.9.0-comet/debian-9.9.0-comet.xml",
-                    "7a7679c0d4963823d38ee92f90d95977081a1948","debian-9.9.0-comet");
-
-            //n0.setImage("http://geni-images.renci.org/images/standard/fedora-comet/fedora30-v1.2-comet/fedora30-v1.2-comet.xml",
-            //        "8ed6c2d1e69b30f42b2deb02eb6b7404679c212d","fedora30-v1.2-comet");
-
-            //n0.setImage("http://geni-images.renci.org/images/standard/ubuntu-comet/ubuntu-16.04-comet/ubuntu-16.04-comet.xml",
-            //        "cd51e0f0399b54b3c6b48917ec819ffe75d8c200","ubuntu-16.04-comet");
-
+            n0.setImage("http://geni-images.renci.org/images/kthare10/mobius/mb-centos-7/mb-centos-7.xml",
+                    "1cb9bde255314761e10d8c9bde727c69bb2c1ca4","mb-centos-7");
 
             n0.setNodeType("XO Medium");
-            n0.setDomain("ROCKY XO Rack");
+            n0.setDomain("UFL (Gainesville, FL USA) XO Rack");
 
-            String storageName = "Storage0";
-            StorageNode storage = s.addStorageNode(storageName, 1, "/mnt/target");
-            storage.setDomain(n0.getDomain());
-            System.out.println("after Adding storage=" + storage.toString());
-
-            LinkNetwork conn = s.addLinkNetwork("C2S0");
-            conn.stitch(storage);
-            conn.stitch(n0, storage);
-
-            System.out.println("testCreateSliceWithStorage:\n" + s.getRequest());
-
+            StitchPort stitchPort = s.addStitchPort("SP1", "3291",
+                    "http://geni-orca.renci.org/owl/ion.rdf#AL2S/Chameleon/Cisco/6509/GigabitEthernet/1/1",
+                    10000000L);
+            n0.stitch(stitchPort);
             s.commit();
-
             System.out.println("successfully created slice");
         } catch (Exception e){
             e.printStackTrace();
             System.err.println("Proxy factory test failed");
             assert(false);
         }
-
     }
+
+    public static void testModifyWithStitchPort(String pem, String sliceName, String stitchPortName) {
+        Slice s = null;
+        try{
+
+            ITransportProxyFactory ifac = new XMLRPCProxyFactory();
+            System.out.println("Opening certificate " + pem + " and key " + pem);
+            TransportContext ctx = new PEMTransportContext("", pem, pem);
+
+            ISliceTransportAPIv1 sliceProxy = ifac.getSliceProxy(ctx, new URL    ("https://geni.renci.org:11443/orca/xmlrpc"));
+
+            s = Slice.loadManifestFile(sliceProxy, sliceName);
+
+            StitchPort stitchPort = (StitchPort) s.getResourceByName(stitchPortName);
+            System.out.println("Res=" + stitchPort.getPathResources());
+            stitchPort.delete();
+
+            System.out.println("Modify Delete Stitchport request====");
+            System.out.println(s.getRequest());
+            System.out.println("Modify Delete Stitchport request====");
+
+           s.commit();
+
+        } catch (Exception e){
+            s.logger().debug("Failed to fetch manifest");
+            e.printStackTrace();
+            return;
+        }
+    }
+
     public static void main(String [] args){
 
     LIBNDL.setLogger();
@@ -1293,7 +1300,8 @@ public class TestDriver {
     //TestDriver.testDelete(args[0],"kthare10.slice1");
     //TestDriver.testNewSlice1(args[0]);
     //TestDriver.testGetSliceState(args[0],"Mobius-Exogeni-kthare10-7fa8e8a8-99c8-4b1b-a96e-aca4b61c8873");
-    TestDriver.testCreateSliceWithStorageOnQueens(args[0]);
+    //TestDriver.testCreateSliceWithStitchPort(args[0]);
+    TestDriver.testModifyWithStitchPort(args[0], "kthare10-slice2", "SP1");
     System.out.println("ndllib TestDriver: END");
     }
 }

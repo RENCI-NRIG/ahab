@@ -287,6 +287,17 @@ public class SliceGraph   {
 		deleteResource((RequestResource)bn);
 	}
 
+    public void deleteResource(StitchPort sp){
+        for (Interface i: sp.getInterfaces()){
+            InterfaceNode2Net interfaceNode2Net = (InterfaceNode2Net)i;
+            this.deleteResource(i);
+        }
+        ndlModel.remove(sp);
+
+        sliceGraph.removeVertex(sp);
+        deleteResource((RequestResource)sp);
+    }
+
 	public void deleteResource(RequestResource requestResource){
 		sliceGraph.removeVertex(requestResource);
 	}

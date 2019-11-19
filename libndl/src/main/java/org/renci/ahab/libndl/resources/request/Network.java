@@ -27,8 +27,6 @@ import org.renci.ahab.libndl.Slice;
 import org.renci.ahab.libndl.SliceGraph;
 import org.renci.ahab.libndl.util.IP4Subnet;
 
-import java.util.Collection;
-import java.util.Collections;
 
 public abstract class Network extends RequestResource {
 	//default size for auto ip
@@ -38,7 +36,6 @@ public abstract class Network extends RequestResource {
     protected long latency;
     protected String label = null;
     protected String realName = null;
-    
     //Subnet for autoIP
     protected IP4Subnet ipSubnet;
 	

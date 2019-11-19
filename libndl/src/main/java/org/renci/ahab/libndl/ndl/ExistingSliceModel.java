@@ -309,6 +309,24 @@ public class ExistingSliceModel extends NDLModel{
 	@Override
 	public void remove(StitchPort sp) {
 		// TODO Auto-generated method stub
+        logger().debug("ExistingSliceModel::remove(StitchPort sp): " +   sp.getURL() + ", " + sp.getGUID());
+
+        try{
+
+            for(Resource resource : sp.getPathResources()) {
+                ngen.declareModifyElementRemoveLink(reservation, resource.getURI(), null);
+            }
+
+            //TODO:  fix that it only removes Interfaces to nodes
+            for (Interface i : sp.getInterfaces()){
+                //this.remove((InterfaceNode2Net)i);
+            }
+
+            ngen.declareModifyElementRemoveLink(reservation, sp.getURL(), sp.getGUID());
+        } catch (NdlException e) {
+            logger().error("ExistingSliceModel::remove(BroadcastNetwork bn), Failed to declareModifyElementRemoveLink" );
+            e.printStackTrace();
+        }
 	}
 
 	@Override
