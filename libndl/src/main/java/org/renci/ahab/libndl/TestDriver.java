@@ -1301,7 +1301,7 @@ public class TestDriver {
     //TestDriver.testNewSlice1(args[0]);
     //TestDriver.testGetSliceState(args[0],"Mobius-Exogeni-kthare10-7fa8e8a8-99c8-4b1b-a96e-aca4b61c8873");
     //TestDriver.testCreateSliceWithStitchPort(args[0]);
-    TestDriver.testModifyWithStitchPort(args[0], "kthare10-slice2", "SP1");
+    //TestDriver.testModifyWithStitchPort(args[0], "kthare10-slice2", "SP1");
     System.out.println("ndllib TestDriver: END");
     }
 }
