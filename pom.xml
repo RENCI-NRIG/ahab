@@ -15,8 +15,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<orca.snap.repository.id>geni-orca-snapshot</orca.snap.repository.id>
 		<orca.rel.repository.id>geni-orca-release</orca.rel.repository.id>
-		<orca.snap.repository.url>http://ci-dev.renci.org/nexus/content/repositories/geni-orca-snapshot/</orca.snap.repository.url>
-		<orca.rel.repository.url>http://ci-dev.renci.org/nexus/content/repositories/geni-orca-release/</orca.rel.repository.url>
+		<orca.snap.repository.url>https://nrig-nexus.renci.org/repository/geni-orca-snapshot/</orca.snap.repository.url>
+		<orca.rel.repository.url>https://nrig-nexus.renci.org/repository/geni-orca-release/</orca.rel.repository.url>
 	</properties>
 
 	<url>https://github.com/RENCI-NRIG/ahab</url>
@@ -102,12 +102,12 @@
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
-				<version>2.3</version>
+				<version>[2.13.2,)</version>
 			</dependency>
 			<dependency>
 				<groupId>orca</groupId>
 				<artifactId>ndl</artifactId>
-				<version>5.4.13-SNAPSHOT</version>
+				<version>5.4.14-SNAPSHOT</version>
 				<type>jar</type>
 			</dependency>
 			<dependency>
@@ -165,7 +165,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>14.0.1</version>
+				<version>[24.1.1,)</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.xmlrpc</groupId>
@@ -195,7 +195,7 @@
 			<dependency>
 				<groupId>orca.core</groupId>
 				<artifactId>util</artifactId>
-				<version>5.4.13-SNAPSHOT</version>
+				<version>5.4.14-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.renci.ahab</groupId>
