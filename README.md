@@ -1,3 +1,5 @@
+# This code is no longer being maintained. The repo is kept for historical reasons.
+
 # ahab
 Ahab is a collection of libraries for managing the state of slices created in ORCA
 
